@@ -2095,7 +2095,7 @@ namespace LuaGlobalFunctions
 #endif
 
 #if defined TRINITY || AZEROTHCORE
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 #endif
         uint8 addedItems = 0;
         while (addedItems <= MAX_MAIL_ITEMS && i + 2 <= argAmount)
