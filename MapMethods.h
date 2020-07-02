@@ -182,6 +182,7 @@ namespace LuaMap
      * @param float x
      * @param float y
      * @param float z
+     * @param uint32 phasemask = PHASEMASK_NORMAL
      * @return uint32 areaId
      */
     int GetAreaId(lua_State* L, Map* map)
