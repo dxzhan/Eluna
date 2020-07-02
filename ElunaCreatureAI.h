@@ -216,15 +216,17 @@ struct ElunaCreatureAI : ScriptedAI
     }
 
     // Called when hit by a spell
-    void SpellHit(Unit* caster, SpellInfo const* spell) override
+    void SpellHit(WorldObject* wo, SpellInfo const* spell)
     {
+        Unit* caster = wo->ToUnit();
         if (!sEluna->SpellHit(me, caster, spell))
             ScriptedAI::SpellHit(caster, spell);
     }
 
     // Called when spell hits a target
-    void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+    void SpellHitTarget(WorldObject* wo, SpellInfo const* spell)
     {
+        Unit* target = wo->ToUnit();
         if (!sEluna->SpellHitTarget(me, target, spell))
             ScriptedAI::SpellHitTarget(target, spell);
     }
