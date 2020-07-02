@@ -222,9 +222,9 @@ struct ElunaCreatureAI : ScriptedAI
     void SpellHit(Unit* caster, SpellInfo const* spell) override
 #endif
     {
-        Unit* caster = wo->ToUnit();
-        if (!sEluna->SpellHit(me, caster, spell))
-            ScriptedAI::SpellHit(caster, spell);
+        Unit* unit = caster->ToUnit();
+        if (!sEluna->SpellHit(me, unit, spell))
+            ScriptedAI::SpellHit(unit, spell);
     }
 
     // Called when spell hits a target
@@ -234,9 +234,9 @@ struct ElunaCreatureAI : ScriptedAI
     void SpellHitTarget(Unit* target, SpellInfo const* spell) override
 #endif
     {
-        Unit* target = wo->ToUnit();
-        if (!sEluna->SpellHitTarget(me, target, spell))
-            ScriptedAI::SpellHitTarget(target, spell);
+        Unit* unit = target->ToUnit();
+        if (!sEluna->SpellHitTarget(me, unit, spell))
+            ScriptedAI::SpellHitTarget(unit, spell);
     }
 
 #if defined TRINITY || AZEROTHCORE
