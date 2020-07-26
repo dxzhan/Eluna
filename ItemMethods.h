@@ -280,13 +280,13 @@ namespace LuaItem
             {
                 const ItemRandomSuffixEntry* itemRandEntry = sItemRandomSuffixStore.LookupEntry(-item->GetItemRandomPropertyId());
                 if (itemRandEntry)
-                    suffix = itemRandEntry->nameSuffix;
+                    suffix = itemRandEntry->Name;
             }
             else
             {
                 const ItemRandomPropertiesEntry* itemRandEntry = sItemRandomPropertiesStore.LookupEntry(item->GetItemRandomPropertyId());
                 if (itemRandEntry)
-                    suffix = itemRandEntry->nameSuffix;
+                    suffix = itemRandEntry->Name;
             }
             if (suffix)
             {

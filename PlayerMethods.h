@@ -2265,7 +2265,7 @@ namespace LuaPlayer
 #else
         data << uint64(unit->GetGUIDLow());
 #endif
-        data << uint32(ahEntry->houseId);
+        data << uint32(ahEntry->ID);
         data << uint8(1);
 #ifdef CMANGOS
         player->GetSession()->SendPacket(data);
@@ -3312,11 +3312,11 @@ namespace LuaPlayer
         {
             if (SkillLineEntry const* entry = sSkillLineStore.LookupEntry(i))
             {
-                if (entry->categoryId == SKILL_CATEGORY_LANGUAGES || entry->categoryId == SKILL_CATEGORY_GENERIC)
+                if (entry->CategoryID == SKILL_CATEGORY_LANGUAGES || entry->CategoryID == SKILL_CATEGORY_GENERIC)
                     continue;
 
-                if (player->HasSkill(entry->id))
-                    player->UpdateSkill(entry->id, step);
+                if (player->HasSkill(entry->ID))
+                    player->UpdateSkill(entry->ID, step);
             }
         }
 

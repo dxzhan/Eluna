@@ -1163,7 +1163,7 @@ namespace LuaUnit
         if (!entry)
             return 1;
 
-        Eluna::Push(L, entry->name[locale]);
+        Eluna::Push(L, entry->Name[locale]);
         return 1;
     }
 
@@ -1202,7 +1202,7 @@ namespace LuaUnit
         if (!entry)
             return 1;
 
-        Eluna::Push(L, entry->name[locale]);
+        Eluna::Push(L, entry->Name[locale]);
         return 1;
     }
 
