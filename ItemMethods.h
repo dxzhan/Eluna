@@ -274,7 +274,11 @@ namespace LuaItem
 #if defined(CATA) || defined (MISTS)
             char* suffix = NULL;
 #else
+#ifdef TRINITY
+           const char* const* suffix = NULL;
+#else
             char* const* suffix = NULL;
+#endif
 #endif
             if (itemRandPropId < 0)
             {
