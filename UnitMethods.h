@@ -2035,7 +2035,11 @@ namespace LuaUnit
      */
     int Emote(lua_State* L, Unit* unit)
     {
+#if defined TRINITY
         unit->HandleEmoteCommand(Eluna::CHECKVAL<uint32>(L, 2));
+#else
+        unit->HandleEmoteCommand(Eluna::CHECKVAL<uint32>(L, 2));
+#endif
         return 0;
     }
 
