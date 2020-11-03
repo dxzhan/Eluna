@@ -297,7 +297,6 @@ namespace LuaItem
 #else
             if (suffix)
 #endif
-            
             {
                 name += ' ';
                 name += suffix[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
