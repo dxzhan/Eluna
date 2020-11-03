@@ -275,7 +275,7 @@ namespace LuaItem
             char* suffix = NULL;
 #else
 #ifdef TRINITY
-           const char* const* suffix = NULL;
+            std::array<char const*, 16> suffix;
 #else
             char* const* suffix = NULL;
 #endif
@@ -292,7 +292,11 @@ namespace LuaItem
                 if (itemRandEntry)
                     suffix = itemRandEntry->Name;
             }
+#ifdef TRINITY
+            if (!suffix.empty())
+#else
             if (suffix)
+#endif
             {
                 name += ' ';
                 name += suffix[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
