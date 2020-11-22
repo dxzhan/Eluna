@@ -42,13 +42,19 @@ void ElunaInstanceAI::Load(const char* data)
 
     if (data[0] == '\0')
     {
+#ifdef TRINITY
+        ASSERT(!sEluna->HasInstanceData(reinterpret_cast<const Map*>(instance)));
+#else
         ASSERT(!sEluna->HasInstanceData(instance));
-
+#endif
         // Create a new table for instance data.
         lua_State* L = sEluna->L;
         lua_newtable(L);
+#ifdef TRINITY
+        sEluna->CreateInstanceData(reinterpret_cast<const Map*>(instance));
+#else
         sEluna->CreateInstanceData(instance);
-
+#endif
         sEluna->OnLoad(this);
         // Stack: (empty)
         return;
@@ -73,7 +79,11 @@ void ElunaInstanceAI::Load(const char* data)
             // Only use the data if it's a table.
             if (lua_istable(L, -1))
             {
+#ifdef TRINITY
+                sEluna->CreateInstanceData(reinterpret_cast<const Map*>(instance));
+#else
                 sEluna->CreateInstanceData(instance);
+#endif
                 // Stack: (empty)
                 sEluna->OnLoad(this);
                 // WARNING! lastSaveData might be different after `OnLoad` if the Lua code saved data.

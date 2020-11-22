@@ -61,7 +61,7 @@ private:
     std::string lastSaveData;
 
 public:
-    ElunaInstanceAI(Map* map) : InstanceData(map)
+    ElunaInstanceAI(Map* map) : InstanceData(reinterpret_cast<InstanceMap*>(map))
     {
     }
 
@@ -114,7 +114,11 @@ public:
         // If Eluna is reloaded, it will be missing our instance data.
         // Reload here instead of waiting for the next hook call (possibly never).
         // This avoids having to have an empty Update hook handler just to trigger the reload.
+#ifdef TRINITY
+        if (!sEluna->HasInstanceData(reinterpret_cast<const Map*>(instance)))
+#else
         if (!sEluna->HasInstanceData(instance))
+#endif
             Reload();
 
         sEluna->OnUpdateInstance(this, diff);

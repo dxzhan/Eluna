@@ -119,8 +119,6 @@ bool Eluna::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* pTrigger)
 #ifndef AZEROTHCORE
     Push(pTrigger->ID);
 #else
-    Push(pTrigger->entry);
-#else
     Push(pTrigger->id);
     
 #endif

@@ -300,7 +300,7 @@ namespace LuaItem
             {
                 name += ' ';
 #if defined TRINITY
-                name += (*suffix)[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
+                name += (suffix)[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
 #else
                 name += suffix[(name != temp->Name1) ? locale : uint8(DEFAULT_LOCALE)];
 #endif
