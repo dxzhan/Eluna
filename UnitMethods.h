@@ -1563,10 +1563,7 @@ namespace LuaUnit
         uint8 newlevel = Eluna::CHECKVAL<uint8>(L, 2);
 
         if (newlevel < 1)
-            return 0;
-
-        if (newlevel > STRONG_MAX_LEVEL)
-            newlevel = STRONG_MAX_LEVEL;
+            return luaL_argerror(L, 2, "level cannot be below 1");
 
         if (Player* player = unit->ToPlayer())
         {
@@ -2033,7 +2030,7 @@ namespace LuaUnit
      *
      * @param uint32 emoteId
      */
-    int Emote(lua_State* L, Unit* unit)
+    int PerformEmote(lua_State* L, Unit* unit)
     {
 #if defined TRINITY
         unit->HandleEmoteCommand(Eluna::CHECKVAL<uint32>(L, 2));

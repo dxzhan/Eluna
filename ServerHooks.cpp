@@ -120,6 +120,9 @@ bool Eluna::OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* pTrigger)
     Push(pTrigger->ID);
 #else
     Push(pTrigger->entry);
+#else
+    Push(pTrigger->id);
+    
 #endif
     return CallAllFunctionsBool(ServerEventBindings, key);
 }
