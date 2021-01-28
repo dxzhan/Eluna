@@ -14,6 +14,9 @@
 #include "InstanceData.h"
 #endif
 
+#ifdef TRINITY
+#include "Map.h"
+#endif
 
 /*
  * This class is a small wrapper around `InstanceData`,
@@ -61,9 +64,15 @@ private:
     std::string lastSaveData;
 
 public:
-    ElunaInstanceAI(Map* map) : InstanceData(reinterpret_cast<InstanceMap*>(map))
+#ifdef TRINITY
+    ElunaInstanceAI(Map* map) : InstanceData(map->ToInstanceMap())
     {
     }
+#else
+    ElunaInstanceAI(Map* map) : InstanceData(map)
+    {
+    }
+#endif
 
 #ifndef TRINITY
     void Initialize() override;
