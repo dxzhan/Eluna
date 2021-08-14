@@ -92,7 +92,7 @@ struct ElunaCreatureAI : ScriptedAI
 #if AZEROTHCORE
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask) override
 #else
-    void DamageTaken(Unit* attacker, uint32& damage) override
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo = nullptr) override
 #endif
     {
         if (!sEluna->DamageTaken(me, attacker, damage))
@@ -100,7 +100,7 @@ struct ElunaCreatureAI : ScriptedAI
 #if AZEROTHCORE
             ScriptedAI::DamageTaken(attacker, damage, damagetype, damageSchoolMask);
 #else
-            ScriptedAI::DamageTaken(attacker, damage);
+            ScriptedAI::DamageTaken(attacker, damage, damageType, spellInfo);
 #endif
         }
     }
