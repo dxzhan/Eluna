@@ -2518,7 +2518,7 @@ namespace LuaPlayer
         float discountMod = Eluna::CHECKVAL<float>(L, 4);
         bool guildBank = Eluna::CHECKVAL<bool>(L, 5, false);
 
-#ifdef CLASSIC
+#if defined CLASSIC || TRINITY
         Eluna::Push(L, player->DurabilityRepair(position, cost, discountMod));
 #else
         Eluna::Push(L, player->DurabilityRepair(position, cost, discountMod, guildBank));
