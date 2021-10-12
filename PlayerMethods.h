@@ -335,7 +335,7 @@ namespace LuaPlayer
      */
     int IsMoving(lua_State* L, Player* player) // enable for unit when mangos support it
     {
-        Eluna::Push(L, player->isMoving());
+        Eluna::Push(L, player->IsMoving());
         return 1;
     }
 

@@ -106,7 +106,7 @@ namespace LuaUnit
         Creature* creature = Eluna::CHECKOBJ<Creature>(L, 2);
 
 #if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, unit->isInAccessiblePlaceFor(creature));
+        Eluna::Push(L, unit->IsInAccessiblePlaceFor(creature));
 #else
         Eluna::Push(L, unit->isInAccessablePlaceFor(creature));
 #endif
@@ -303,7 +303,7 @@ namespace LuaUnit
 #ifdef MANGOS
         Eluna::Push(L, unit->IsDead());
 #else
-        Eluna::Push(L, unit->isDead());
+        Eluna::Push(L, unit->IsDead());
 #endif
         return 1;
     }
@@ -318,7 +318,7 @@ namespace LuaUnit
 #ifdef MANGOS
         Eluna::Push(L, unit->IsDying());
 #else
-        Eluna::Push(L, unit->isDying());
+        Eluna::Push(L, unit->IsDying());
 #endif
         return 1;
     }

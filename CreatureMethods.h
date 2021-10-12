@@ -56,7 +56,7 @@ namespace LuaCreature
     {
         bool mustBeDead = Eluna::CHECKVAL<bool>(L, 2, false);
 
-#ifdef MANGOS
+#if defined(MANGOS) || defined(TRINITY)
         Eluna::Push(L, creature->IsTargetableForAttack(mustBeDead));
 #else
         Eluna::Push(L, creature->isTargetableForAttack(mustBeDead));
