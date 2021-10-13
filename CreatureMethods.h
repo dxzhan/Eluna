@@ -951,7 +951,7 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     {
         int32 state = Eluna::CHECKVAL<int32>(L, 2);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(AZEROTHCORE)
         creature->setDeathState((DeathState)state);
 #else
         creature->SetDeathState((DeathState)state);

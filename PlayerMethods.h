@@ -445,7 +445,11 @@ namespace LuaPlayer
      */
     int IsImmuneToDamage(lua_State* L, Player* player)
     {
+#if defined TRINITY
+        Eluna::Push(L, player->IsTotalImmune());
+#else
         Eluna::Push(L, player->isTotalImmune());
+#endif
         return 1;
     }
 
@@ -500,7 +504,11 @@ namespace LuaPlayer
      */
     int IsDND(lua_State* L, Player* player)
     {
+#if defined TRINITY
+        Eluna::Push(L, player->IsDND());
+#else
         Eluna::Push(L, player->isDND());
+#endif
         return 1;
     }
 
@@ -511,7 +519,11 @@ namespace LuaPlayer
      */
     int IsAFK(lua_State* L, Player* player)
     {
+#if defined TRINITY
+        Eluna::Push(L, player->IsAFK());
+#else
         Eluna::Push(L, player->isAFK());
+#endif
         return 1;
     }
 
@@ -568,8 +580,11 @@ namespace LuaPlayer
     int IsHonorOrXPTarget(lua_State* L, Player* player)
     {
         Unit* victim = Eluna::CHECKOBJ<Unit>(L, 2);
-
+#if defined TRINITY
+        Eluna::Push(L, player->IsHonorOrXPTarget(victim));
+#else
         Eluna::Push(L, player->isHonorOrXPTarget(victim));
+#endif
         return 1;
     }
 
@@ -589,7 +604,11 @@ namespace LuaPlayer
 
     int IsGMVisible(lua_State* L, Player* player)
     {
+#ifdef TRINITY
+        Eluna::Push(L, player->IsGMVisible());
+#else
         Eluna::Push(L, player->isGMVisible());
+#endif
         return 1;
     }
 
@@ -600,7 +619,7 @@ namespace LuaPlayer
      */
     int IsTaxiCheater(lua_State* L, Player* player)
     {
-#ifdef MANGOS
+#if defined MANGOS || defined TRINITY
         Eluna::Push(L, player->IsTaxiCheater());
 #else
         Eluna::Push(L, player->isTaxiCheater());
@@ -610,7 +629,11 @@ namespace LuaPlayer
 
     int IsGMChat(lua_State* L, Player* player)
     {
+#ifdef TRINITY
+        Eluna::Push(L, player->IsGMChat());
+#else
         Eluna::Push(L, player->isGMChat());
+#endif
         return 1;
     }
 
@@ -621,7 +644,11 @@ namespace LuaPlayer
      */
     int IsAcceptingWhispers(lua_State* L, Player* player)
     {
+#ifdef TRINITY
+        Eluna::Push(L, player->IsAcceptWhispers());
+#else
         Eluna::Push(L, player->isAcceptWhispers());
+#endif
         return 1;
     }
 
