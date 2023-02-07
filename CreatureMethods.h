@@ -15,6 +15,43 @@
 namespace LuaCreature
 {
     /**
+     * Returns `true` if the [Creature] can regenerate health,
+     *   and returns `false` otherwise.
+     *
+     * @return bool isRegenerating
+     */
+    int IsRegeneratingHealth(lua_State* L, Creature* creature)
+    {
+#if defined(AZEROTHCORE)
+        Eluna::Push(L, creature->isRegeneratingHealth());
+#elif defined(TRINITY)
+        Eluna::Push(L, creature->CanRegenerateHealth());
+#else
+        Eluna::Push(L, creature->IsRegeneratingHealth());
+#endif
+        return 1;
+    }
+
+#if defined(TRINITY) || defined(AZEROTHCORE)
+    /**
+     * Sets whether the [Creature] can regenerate health or not.
+     *
+     * @param bool enable = true : `true` to enable health regeneration, `false` to disable it
+     */
+    int SetRegeneratingHealth(lua_State* L, Creature* creature)
+    {
+        bool enable = Eluna::CHECKVAL<bool>(L, 2, true);
+
+#if defined(AZEROTHCORE)
+        creature->SetRegeneratingHealth(enable);
+#else
+        creature->SetRegenerateHealth(enable);
+#endif
+        return 0;
+    }
+#endif
+
+    /**
      * Returns `true` if the [Creature] is set to not give reputation when killed,
      *   and returns `false` otherwise.
      *
@@ -22,7 +59,11 @@ namespace LuaCreature
      */
     int IsReputationGainDisabled(lua_State* L, Creature* creature)
     {
+#ifndef CMANGOS
         Eluna::Push(L, creature->IsReputationGainDisabled());
+#else
+        Eluna::Push(L, creature->IsNoReputation());
+#endif
         return 1;
     }
 
@@ -56,7 +97,7 @@ namespace LuaCreature
     {
         bool mustBeDead = Eluna::CHECKVAL<bool>(L, 2, false);
 
-#ifdef MANGOS
+#if defined(MANGOS) || defined(CMANGOS) || defined(TRINITY)
         Eluna::Push(L, creature->IsTargetableForAttack(mustBeDead));
 #else
         Eluna::Push(L, creature->isTargetableForAttack(mustBeDead));
@@ -137,7 +178,7 @@ namespace LuaCreature
      */
     int CanAggro(lua_State* L, Creature* creature)
     {
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(TRINITY) || defined(AZEROTHCORE) || defined(CMANGOS)
         Eluna::Push(L, !creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC));
 #else
         // Eluna::Push(L, creature->CanInitiateAttack());
@@ -233,6 +274,20 @@ namespace LuaCreature
         Eluna::Push(L, creature->IsRacialLeader());
         return 1;
     }
+
+    /**
+     * Returns `true` if the [Creature]'s flags_extra includes Dungeon Boss (0x1000000),
+     *   and returns `false` otherwise.
+     *
+     * @return bool isDungeonBoss
+     */
+#if defined(TRINITY) || defined(AZEROTHCORE)
+    int IsDungeonBoss(lua_State* L, Creature* creature)
+    {
+        Eluna::Push(L, creature->IsDungeonBoss());
+        return 1;
+    }
+#endif
 
     /**
      * Returns `true` if the [Creature]'s rank is Boss,
@@ -718,7 +773,7 @@ namespace LuaCreature
 #elif defined(TRINITY)
         auto const& threatlist = creature->GetThreatManager().GetSortedThreatList();
 #elif defined(AZEROTHCORE)
-        auto const& threatlist = creature->getThreatManager().getThreatList();
+        auto const& threatlist = creature->getThreatMgr().getThreatList();
 #endif
 #ifndef TRINITY
         if (threatlist.empty())
@@ -807,19 +862,30 @@ namespace LuaCreature
     int GetAITargets(lua_State* L, Creature* creature)
     {
 #if defined(TRINITY)
-        auto const& threatlist = creature->GetThreatManager().GetThreatenedByMeList();
+        auto const& threatlist = creature->GetThreatManager().GetSortedThreatList();
 #elif defined(AZEROTHCORE)
-auto const& threatlist = creature->getThreatManager().getThreatList();
+        auto const& threatlist = creature->getThreatMgr().getThreatList();
+#elif defined(CMANGOS)
+        auto const& threatlist = creature->getThreatManager().getThreatList();
 #else
         ThreatList const& threatlist = creature->GetThreatManager().getThreatList();
 #endif
+
+#if defined(TRINITY)
+        lua_createtable(L, creature->GetThreatManager().GetThreatListSize(), 0);
+#else
         lua_createtable(L, threatlist.size(), 0);
+#endif
         int tbl = lua_gettop(L);
         uint32 i = 0;
+#if defined(TRINITY)
+        for (ThreatReference const* itr : threatlist)
+#else
         for (auto itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+#endif
         {
 #if defined(TRINITY)
-            Unit* target = itr->second->GetOwner();
+            Unit* target = itr->GetVictim();
 #else
             Unit* target = (*itr)->getTarget();
 #endif
@@ -841,8 +907,10 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     int GetAITargetsCount(lua_State* L, Creature* creature)
     {
 #if defined(TRINITY)
-        Eluna::Push(L, creature->GetThreatManager().GetThreatenedByMeList().size());
+        Eluna::Push(L, creature->GetThreatManager().GetThreatListSize());
 #elif defined(AZEROTHCORE)
+        Eluna::Push(L, creature->getThreatMgr().getThreatList().size());
+#elif defined(CMANGOS)
         Eluna::Push(L, creature->getThreatManager().getThreatList().size());
 #else
         Eluna::Push(L, creature->GetThreatManager().getThreatList().size());
@@ -861,6 +929,24 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     int GetNPCFlags(lua_State* L, Creature* creature)
     {
         Eluna::Push(L, creature->GetUInt32Value(UNIT_NPC_FLAGS));
+        return 1;
+    }
+
+    /**
+     * Returns the [Creature]'s Extra flags.
+     *
+     * These are used to control whether the NPC is a civilian, uses pathfinding,
+     *   if it's a guard, etc.
+     *
+     * @return [ExtraFlags] extraFlags
+     */
+    int GetExtraFlags(lua_State* L, Creature* creature)
+    {
+#if defined(TRINITY) || defined(AZEROTHCORE)
+        Eluna::Push(L, creature->GetCreatureTemplate()->flags_extra);
+#else
+        Eluna::Push(L, creature->GetCreatureInfo()->ExtraFlags);
+#endif
         return 1;
     }
 
@@ -892,7 +978,7 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
      */
     int GetDBTableGUIDLow(lua_State* L, Creature* creature)
     {
-#if defined(TRINITY)
+#if defined(TRINITY) || defined(AZEROTHCORE)
         Eluna::Push(L, creature->GetSpawnId());
 #else
         // on mangos based this is same as lowguid
@@ -914,6 +1000,20 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
         return 0;
     }
 
+#if defined(TRINITY) || defined(AZEROTHCORE)
+    /**
+     * Sets the [Creature]'s ReactState to `state`.
+     *
+     * @param [ReactState] state
+     */
+    int SetReactState(lua_State* L, Creature* creature)
+    {
+        uint32 state = Eluna::CHECKVAL<uint32>(L, 2);
+
+        creature->SetReactState((ReactStates)state);
+        return 0;
+    }
+#endif
 
     /**
      * Makes the [Creature] able to fly if enabled.
@@ -951,7 +1051,7 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     {
         int32 state = Eluna::CHECKVAL<int32>(L, 2);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(AZEROTHCORE)
         creature->setDeathState((DeathState)state);
 #else
         creature->SetDeathState((DeathState)state);
@@ -1006,7 +1106,7 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     {
         bool allow = Eluna::CHECKVAL<bool>(L, 2, true);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(TRINITY) || defined(AZEROTHCORE) || defined(CMANGOS)
         if (allow)
             creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         else
@@ -1029,8 +1129,11 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
     int SetDisableReputationGain(lua_State* L, Creature* creature)
     {
         bool disable = Eluna::CHECKVAL<bool>(L, 2, true);
-
+#ifndef CMANGOS
         creature->SetDisableReputationGain(disable);
+#else
+        creature->SetNoReputation(disable);
+#endif
         return 0;
     }
 
@@ -1282,7 +1385,7 @@ auto const& threatlist = creature->getThreatManager().getThreatList();
         uint32 entry = Eluna::CHECKVAL<uint32>(L, 2);
         uint32 dataGuidLow = Eluna::CHECKVAL<uint32>(L, 3, 0);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(TRINITY) || defined(AZEROTHCORE) || defined(CMANGOS)
         creature->UpdateEntry(entry, dataGuidLow ? eObjectMgr->GetCreatureData(dataGuidLow) : NULL);
 #else
         creature->UpdateEntry(entry, ALLIANCE, dataGuidLow ? eObjectMgr->GetCreatureData(dataGuidLow) : NULL);
