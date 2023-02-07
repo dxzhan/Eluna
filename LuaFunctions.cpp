@@ -120,6 +120,7 @@ luaL_Reg GlobalMethods[] =
 
     // Other
     { "ReloadEluna", &LuaGlobalFunctions::ReloadEluna },
+    { "RunCommand", &LuaGlobalFunctions::RunCommand },
     { "SendWorldMessage", &LuaGlobalFunctions::SendWorldMessage },
     { "WorldDBQuery", &LuaGlobalFunctions::WorldDBQuery },
     { "WorldDBExecute", &LuaGlobalFunctions::WorldDBExecute },
@@ -335,6 +336,7 @@ ElunaRegister<Unit> UnitMethods[] =
 #endif
     { "SetWaterWalk", &LuaUnit::SetWaterWalk },
     { "SetStandState", &LuaUnit::SetStandState },
+    { "SetInCombatWith", &LuaUnit::SetInCombatWith },
     { "ModifyPower", &LuaUnit::ModifyPower },
 
     // Boolean
@@ -387,6 +389,9 @@ ElunaRegister<Unit> UnitMethods[] =
     { "AddAura", &LuaUnit::AddAura },
     { "RemoveAura", &LuaUnit::RemoveAura },
     { "RemoveAllAuras", &LuaUnit::RemoveAllAuras },
+#if !defined(CLASSIC)
+    { "RemoveArenaAuras", &LuaUnit::RemoveArenaAuras },
+#endif
     { "ClearInCombat", &LuaUnit::ClearInCombat },
     { "DeMorph", &LuaUnit::DeMorph },
     { "SendUnitWhisper", &LuaUnit::SendUnitWhisper },
@@ -461,6 +466,7 @@ ElunaRegister<Player> PlayerMethods[] =
     { "GetItemByPos", &LuaPlayer::GetItemByPos },
     { "GetItemByEntry", &LuaPlayer::GetItemByEntry },
     { "GetItemByGUID", &LuaPlayer::GetItemByGUID },
+    { "GetMailItem", &LuaPlayer::GetMailItem },
     { "GetReputation", &LuaPlayer::GetReputation },
     { "GetEquippedItemBySlot", &LuaPlayer::GetEquippedItemBySlot },
     { "GetQuestLevel", &LuaPlayer::GetQuestLevel },
@@ -661,6 +667,9 @@ ElunaRegister<Player> PlayerMethods[] =
     { "ModifyMoney", &LuaPlayer::ModifyMoney },
     { "LearnSpell", &LuaPlayer::LearnSpell },
     { "LearnTalent", &LuaPlayer::LearnTalent },
+#if !defined(CLASSIC)
+    { "RemoveArenaSpellCooldowns", &LuaPlayer::RemoveArenaSpellCooldowns },
+#endif
     { "RemoveItem", &LuaPlayer::RemoveItem },
     { "RemoveLifetimeKills", &LuaPlayer::RemoveLifetimeKills },
     { "ResurrectPlayer", &LuaPlayer::ResurrectPlayer },
@@ -727,6 +736,7 @@ ElunaRegister<Player> PlayerMethods[] =
     { "SendTabardVendorActivate", &LuaPlayer::SendTabardVendorActivate },
     { "SendSpiritResurrect", &LuaPlayer::SendSpiritResurrect },
     { "SendTaxiMenu", &LuaPlayer::SendTaxiMenu },
+    { "SendUpdateWorldState", &LuaPlayer::SendUpdateWorldState },
     { "RewardQuest", &LuaPlayer::RewardQuest },
     { "SendAuctionMenu", &LuaPlayer::SendAuctionMenu },
     { "SendShowMailBox", &LuaPlayer::SendShowMailBox },
@@ -782,6 +792,7 @@ ElunaRegister<Creature> CreatureMethods[] =
     { "GetLootRecipient", &LuaCreature::GetLootRecipient },
     { "GetLootRecipientGroup", &LuaCreature::GetLootRecipientGroup },
     { "GetNPCFlags", &LuaCreature::GetNPCFlags },
+    { "GetExtraFlags", &LuaCreature::GetExtraFlags },
 #if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
     { "GetShieldBlockValue", &LuaCreature::GetShieldBlockValue },
 #endif
@@ -789,6 +800,9 @@ ElunaRegister<Creature> CreatureMethods[] =
     { "GetCreatureFamily", &LuaCreature::GetCreatureFamily },
 
     // Setters
+#if defined(TRINITY) || defined(AZEROTHCORE)
+    { "SetRegeneratingHealth", &LuaCreature::SetRegeneratingHealth },
+#endif
     { "SetHover", &LuaCreature::SetHover },
     { "SetDisableGravity", &LuaCreature::SetDisableGravity },
     { "SetAggroEnabled", &LuaCreature::SetAggroEnabled },
@@ -803,12 +817,19 @@ ElunaRegister<Creature> CreatureMethods[] =
     { "SetLootMode", &LuaCreature::SetLootMode },
 #endif
     { "SetNPCFlags", &LuaCreature::SetNPCFlags },
+#if defined(TRINITY) || AZEROTHCORE
+    { "SetReactState", &LuaCreature::SetReactState },
+#endif
     { "SetDeathState", &LuaCreature::SetDeathState },
     { "SetWalk", &LuaCreature::SetWalk },
     { "SetHomePosition", &LuaCreature::SetHomePosition },
     { "SetEquipmentSlots", &LuaCreature::SetEquipmentSlots },
 
     // Boolean
+    { "IsRegeneratingHealth", &LuaCreature::IsRegeneratingHealth },
+#if defined(TRINITY) || defined(AZEROTHCORE)
+    { "IsDungeonBoss", &LuaCreature::IsDungeonBoss },
+#endif
     { "IsWorldBoss", &LuaCreature::IsWorldBoss },
     { "IsRacialLeader", &LuaCreature::IsRacialLeader },
     { "IsCivilian", &LuaCreature::IsCivilian },
@@ -955,7 +976,7 @@ ElunaRegister<Item> ItemMethods[] =
     { "IsEquipped", &LuaItem::IsEquipped },
     { "HasQuest", &LuaItem::HasQuest },
     { "IsPotion", &LuaItem::IsPotion },
-#if defined(CLASSIC) || defined(TBC) || defined(WOTLK)
+#if defined(WOTLK)
     { "IsWeaponVellum", &LuaItem::IsWeaponVellum },
     { "IsArmorVellum", &LuaItem::IsArmorVellum },
 #endif
@@ -1062,7 +1083,9 @@ ElunaRegister<Group> GroupMethods[] =
     { "RemoveMember", &LuaGroup::RemoveMember },
     { "Disband", &LuaGroup::Disband },
     { "IsFull", &LuaGroup::IsFull },
-    // {"IsLFGGroup", &LuaGroup::IsLFGGroup},                     // :IsLFGGroup() - UNDOCUMENTED - Returns true if the group is an LFG group
+#if !(defined(CLASSIC) || defined(TBC))
+    { "IsLFGGroup", &LuaGroup::IsLFGGroup },
+#endif
     { "IsRaidGroup", &LuaGroup::IsRaidGroup },
     { "IsBGGroup", &LuaGroup::IsBGGroup },
     // {"IsBFGroup", &LuaGroup::IsBFGroup},                       // :IsBFGroup() - UNDOCUMENTED - Returns true if the group is a battlefield group

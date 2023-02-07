@@ -195,7 +195,7 @@ namespace LuaItem
         return 1;
     }
 
-#if defined CLASSIC || defined(TBC) || defined(WOTLK)
+#if defined(WOTLK)
     /**
      * Returns 'true' if the [Item] is a weapon vellum, 'false' otherwise
      *
@@ -319,7 +319,7 @@ namespace LuaItem
             item->GetEnchantmentId(BONUS_ENCHANTMENT_SLOT) << ":" <<
 #endif
             item->GetItemRandomPropertyId() << ":" << item->GetItemSuffixFactor() << ":" <<
-#ifdef TRINITY
+#if defined(TRINITY) || CMANGOS
             (uint32)item->GetOwner()->GetLevel() << "|h[" << name << "]|h|r";
 #else
             (uint32)item->GetOwner()->getLevel() << "|h[" << name << "]|h|r";
@@ -752,11 +752,8 @@ namespace LuaItem
      */
     int SaveToDB(lua_State* /*L*/, Item* item)
     {
-#if defined TRINITY
+#if defined TRINITY || defined AZEROTHCORE
         CharacterDatabaseTransaction trans = CharacterDatabaseTransaction(nullptr);
-        item->SaveToDB(trans);
-#elif defined AZEROTHCORE
-        SQLTransaction trans = SQLTransaction(NULL);
         item->SaveToDB(trans);
 #else
         item->SaveToDB();

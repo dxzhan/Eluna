@@ -10,7 +10,9 @@
 #include "BindingMap.h"
 
 #ifdef AZEROTHCORE
-#include "BanManager.h"
+
+#include "BanMgr.h"
+
 enum BanMode
 {
     BAN_ACCOUNT = 1,
@@ -61,7 +63,7 @@ namespace LuaGlobalFunctions
 
     int GetRealmID(lua_State* L)
     {
-#ifdef MANGOS
+#if defined(MANGOS) || CMANGOS
         Eluna::Push(L, realmID);
 #else
         Eluna::Push(L, sConfigMgr->GetIntDefault("RealmID", 1));
@@ -80,7 +82,11 @@ namespace LuaGlobalFunctions
      */
     int GetCoreVersion(lua_State* L)
     {
+#ifdef MANGOS
+        Eluna::Push(L, GitRevision::GetProjectRevision());
+#else
         Eluna::Push(L, CORE_VERSION);
+#endif
         return 1;
     }
 
@@ -122,13 +128,13 @@ namespace LuaGlobalFunctions
     /**
      * Finds and Returns [Player] by guid if found
      *
-     * @param uint64 guid : guid of the [Player], you can get it with [Object:GetGUID]
+     * @param ObjectGuid guid : guid of the [Player], you can get it with [Object:GetGUID]
      * @return [Player] player
      */
     int GetPlayerByGUID(lua_State* L)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
-        Eluna::Push(L, eObjectAccessor()FindPlayer(ObjectGuid(guid)));
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
+        Eluna::Push(L, eObjectAccessor()FindPlayer(guid));
         return 1;
     }
 
@@ -198,10 +204,8 @@ namespace LuaGlobalFunctions
         });
 #else
         {
-#ifdef TRINITY
+#if defined TRINITY || AZEROTHCORE
             std::shared_lock<std::shared_mutex> lock(*HashMapHolder<Player>::GetLock());
-#elif defined(AZEROTHCORE)
-            ACORE_READ_GUARD(HashMapHolder<Player>::LockType, *HashMapHolder<Player>::GetLock());
 #else
             HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
 #endif
@@ -212,7 +216,7 @@ namespace LuaGlobalFunctions
                 {
                     if (!player->IsInWorld())
                         continue;
-#if defined TRINITY || AZEROTHCORE
+#if defined TRINITY || AZEROTHCORE || CMANGOS
                     if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->IsGameMaster()))
 #else
                     if ((team == TEAM_NEUTRAL || player->GetTeamId() == team) && (!onlyGM || player->isGameMaster()))
@@ -261,14 +265,14 @@ namespace LuaGlobalFunctions
     /**
      * Returns [Guild] by the leader's GUID
      *
-     * @param uint64 guid : the guid of a [Guild] leader
+     * @param ObjectGuid guid : the guid of a [Guild] leader
      * @return [Guild] guild, or `nil` if it doesn't exist
      */
     int GetGuildByLeaderGUID(lua_State* L)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
 
-        Eluna::Push(L, eGuildMgr->GetGuildByLeader(ObjectGuid(guid)));
+        Eluna::Push(L, eGuildMgr->GetGuildByLeader(guid));
         return 1;
     }
 
@@ -291,7 +295,7 @@ namespace LuaGlobalFunctions
      * [Player] and [Creature] for example can have the same low GUID but not GUID.
      *
      * @param uint32 lowguid : low GUID of the [Player]
-     * @return uint64 guid
+     * @return ObjectGuid guid
      */
     int GetPlayerGUID(lua_State* L)
     {
@@ -307,7 +311,7 @@ namespace LuaGlobalFunctions
      * [Player] and [Item] for example can have the same low GUID but not GUID.
      *
      * @param uint32 lowguid : low GUID of the [Item]
-     * @return uint64 guid
+     * @return ObjectGuid guid
      */
     int GetItemGUID(lua_State* L)
     {
@@ -325,7 +329,7 @@ namespace LuaGlobalFunctions
      *
      * @param uint32 lowguid : low GUID of the [GameObject]
      * @param uint32 entry : entry ID of the [GameObject]
-     * @return uint64 guid
+     * @return ObjectGuid guid
      */
     int GetObjectGUID(lua_State* L)
     {
@@ -344,7 +348,7 @@ namespace LuaGlobalFunctions
      *
      * @param uint32 lowguid : low GUID of the [Creature]
      * @param uint32 entry : entry ID of the [Creature]
-     * @return uint64 guid
+     * @return ObjectGuid guid
      */
     int GetUnitGUID(lua_State* L)
     {
@@ -370,14 +374,14 @@ namespace LuaGlobalFunctions
      * For example creatures in instances use the same low GUID assigned for that spawn in the database.
      * This is why to identify a creature you have to know the instanceId and low GUID. See [Map:GetIntstanceId]
      *
-     * @param uint64 guid : GUID of an [Object]
+     * @param ObjectGuid guid : GUID of an [Object]
      * @return uint32 lowguid : low GUID of the [Object]
      */
     int GetGUIDLow(lua_State* L)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
 
-        Eluna::Push(L, GUID_LOPART(guid));
+        Eluna::Push(L, guid.GetCounter());
         return 1;
     }
 
@@ -435,13 +439,13 @@ namespace LuaGlobalFunctions
      *
      * GUID consist of entry ID, low GUID, and type ID.
      *
-     * @param uint64 guid : GUID of an [Object]
+     * @param ObjectGuid guid : GUID of an [Object]
      * @return int32 typeId : type ID of the [Object]
      */
     int GetGUIDType(lua_State* L)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
-        Eluna::Push(L, static_cast<int>(GUID_HIPART(guid)));
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
+        Eluna::Push(L, static_cast<int>(guid.GetHigh()));
         return 1;
     }
 
@@ -450,13 +454,13 @@ namespace LuaGlobalFunctions
      *
      * GUID consist of entry ID, low GUID, and type ID.
      *
-     * @param uint64 guid : GUID of an [Creature] or [GameObject]
+     * @param ObjectGuid guid : GUID of an [Creature] or [GameObject]
      * @return uint32 entry : entry ID, or `0` if `guid` is not a [Creature] or [GameObject]
      */
     int GetGUIDEntry(lua_State* L)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
-        Eluna::Push(L, GUID_ENPART(guid));
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
+        Eluna::Push(L, guid.GetEntry());
         return 1;
     }
 
@@ -533,7 +537,7 @@ namespace LuaGlobalFunctions
         lua_pushvalue(L, 3);
         int functionRef = luaL_ref(L, LUA_REGISTRYINDEX);
         if (functionRef >= 0)
-            return Eluna::GetEluna(L)->Register(L, regtype, id, 0, 0, ev, functionRef, shots);
+            return Eluna::GetEluna(L)->Register(L, regtype, id, ObjectGuid(), 0, ev, functionRef, shots);
         else
             luaL_argerror(L, 3, "unable to make a ref to function");
         return 0;
@@ -548,7 +552,7 @@ namespace LuaGlobalFunctions
         lua_pushvalue(L, 2);
         int functionRef = luaL_ref(L, LUA_REGISTRYINDEX);
         if (functionRef >= 0)
-            return Eluna::GetEluna(L)->Register(L, regtype, 0, 0, 0, ev, functionRef, shots);
+            return Eluna::GetEluna(L)->Register(L, regtype, 0, ObjectGuid(), 0, ev, functionRef, shots);
         else
             luaL_argerror(L, 2, "unable to make a ref to function");
         return 0;
@@ -556,7 +560,7 @@ namespace LuaGlobalFunctions
 
     static int RegisterUniqueHelper(lua_State* L, int regtype)
     {
-        uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
+        ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
         uint32 instanceId = Eluna::CHECKVAL<uint32>(L, 2);
         uint32 ev = Eluna::CHECKVAL<uint32>(L, 3);
         luaL_checktype(L, 4, LUA_TFUNCTION);
@@ -583,7 +587,7 @@ namespace LuaGlobalFunctions
      *         SERVER_EVENT_ON_SOCKET_CLOSE            =     4,       // Not Implemented
      *         SERVER_EVENT_ON_PACKET_RECEIVE          =     5,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
      *         SERVER_EVENT_ON_PACKET_RECEIVE_UNKNOWN  =     6,       // Not Implemented
-     *         SERVER_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
+     *         SERVER_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false
      *
      *         // World
      *         WORLD_EVENT_ON_OPEN_STATE_CHANGE        =     8,        // (event, open) - Needs core support on Mangos
@@ -818,7 +822,7 @@ namespace LuaGlobalFunctions
      * {
      *     PACKET_EVENT_ON_PACKET_RECEIVE          =     5,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
      *     PACKET_EVENT_ON_PACKET_RECEIVE_UNKNOWN  =     6,       // Not Implemented
-     *     PACKET_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false, newPacket
+     *     PACKET_EVENT_ON_PACKET_SEND             =     7,       // (event, packet, player) - Player only if accessible. Can return false
      *
      *     PACKET_EVENT_COUNT
      * };
@@ -1145,7 +1149,7 @@ namespace LuaGlobalFunctions
      * @proto cancel = (guid, instance_id, event, function)
      * @proto cancel = (guid, instance_id, event, function, shots)
      *
-     * @param uint64 guid : the GUID of a single [Creature]
+     * @param ObjectGuid guid : the GUID of a single [Creature]
      * @param uint32 instance_id : the instance ID of a single [Creature]
      * @param uint32 event : refer to CreatureEvents above
      * @param function function : function that will be called when the event occurs
@@ -1203,6 +1207,23 @@ namespace LuaGlobalFunctions
     int ReloadEluna(lua_State* /*L*/)
     {
         Eluna::ReloadEluna();
+        return 0;
+    }
+
+    /**
+     * Runs a command.
+     *
+     * @param string command : the command to run
+     */
+    int RunCommand(lua_State* L)
+    {
+        const char* command = Eluna::CHECKVAL<const char*>(L, 1);
+#if defined TRINITY || AZEROTHCORE
+        // ignores output of the command
+        eWorld->QueueCliCommand(new CliCommandHolder(nullptr, command, [](void*, std::string_view) {}, [](void*, bool) {}));
+#elif defined MANGOS
+        eWorld->QueueCliCommand(new CliCommandHolder(0, SEC_CONSOLE, nullptr, command, nullptr, nullptr));
+#endif
         return 0;
     }
 
@@ -1531,8 +1552,11 @@ namespace LuaGlobalFunctions
                     Eluna::Push(L);
                     return 1;
                 }
-
+#ifdef CMANGOS
+                if (!pCreature->Create(lowguid, lowguid, pos, cinfo))
+#else
                 if (!pCreature->Create(lowguid, pos, cinfo))
+#endif
                 {
                     delete pCreature;
                     Eluna::Push(L);
@@ -1550,7 +1574,11 @@ namespace LuaGlobalFunctions
                 uint32 db_guid = pCreature->GetGUIDLow();
 
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
+#ifndef CMANGOS
                 pCreature->LoadFromDB(db_guid, map);
+#else
+                pCreature->LoadFromDB(db_guid, map, db_guid, 0);
+#endif
 
                 map->Add(pCreature);
                 eObjectMgr->AddCreatureToGrid(db_guid, eObjectMgr->GetCreatureData(db_guid));
@@ -1568,14 +1596,21 @@ namespace LuaGlobalFunctions
                     return 1;
                 }
 
+#ifndef CMANGOS
                 TemporarySummon* pCreature = new TemporarySummon(ObjectGuid(uint64(0)));
+#else
+                TemporarySpawn* pCreature = new TemporarySpawn(ObjectGuid(uint64(0)));
+#endif
 #if (defined(TBC) || defined(CLASSIC))
                 CreatureCreatePos pos(map, x, y, z, o);
 #else
                 CreatureCreatePos pos(map, x, y, z, o, phase);
 #endif
-
+#ifndef CMANGOS
                 if (!pCreature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, TEAM_NONE))
+#else
+                if (!pCreature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+#endif
                 {
                     delete pCreature;
                     {
@@ -1622,8 +1657,12 @@ namespace LuaGlobalFunctions
                 }
 
                 GameObject* pGameObj = new GameObject;
-#if (defined(TBC) || defined(CLASSIC))
+#if ((defined(TBC) || defined(CLASSIC)) && !defined(CMANGOS))
                 if (!pGameObj->Create(db_lowGUID, gInfo->id, map, x, y, z, o))
+#elif ((defined(TBC) || defined(CLASSIC)) && defined(CMANGOS))
+                if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, x, y, z, o))
+#elif defined CMANGOS
+                if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, phase, x, y, z, o))
 #else
                 if (!pGameObj->Create(db_lowGUID, gInfo->id, map, phase, x, y, z, o))
 #endif
@@ -1646,7 +1685,11 @@ namespace LuaGlobalFunctions
 #endif
 
                 // this will generate a new guid if the object is in an instance
+#ifndef CMANGOS
                 if (!pGameObj->LoadFromDB(db_lowGUID, map))
+#else
+                if (!pGameObj->LoadFromDB(db_lowGUID, map, db_lowGUID, 0))
+#endif
                 {
                     delete pGameObj;
                     Eluna::Push(L);
@@ -1666,8 +1709,12 @@ namespace LuaGlobalFunctions
             {
                 GameObject* pGameObj = new GameObject;
 
-#if (defined(TBC) || defined(CLASSIC))
+#if ((defined(TBC) || defined(CLASSIC)) && !defined(CMANGOS))
                 if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, x, y, z, o))
+#elif ((defined(TBC) || defined(CLASSIC)) && defined(CMANGOS))
+                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, x, y, z, o))
+#elif defined CMANGOS
+                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, phase, x, y, z, o))
 #else
                 if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, phase, x, y, z, o))
 #endif
@@ -1704,7 +1751,7 @@ namespace LuaGlobalFunctions
 #ifndef AZEROTHCORE
                 if (!creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, phase, entry, pos))
 #else
-                if (!creature->Create(sObjectMgr->GenerateLowGuid(HIGHGUID_UNIT), map, phase, entry, 0, x, y, z, o))
+                if (!creature->Create(map->GenerateLowGuid<HighGuid::Unit>(), map, phase, entry, 0, x, y, z, o))
 #endif
                 {
                     delete creature;
@@ -1714,11 +1761,8 @@ namespace LuaGlobalFunctions
 
                 creature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), phase);
 
-#ifndef AZEROTHCORE
                 uint32 db_guid = creature->GetSpawnId();
-#else
-                uint32 db_guid = creature->GetDBTableGUIDLow();
-#endif
+
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells()
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature->CleanupsBeforeDelete();
@@ -1727,7 +1771,7 @@ namespace LuaGlobalFunctions
 #ifndef AZEROTHCORE
                 if (!creature->LoadFromDB(db_guid, map, true, true))
 #else
-                if (!creature->LoadFromDB(db_guid, map))
+                if (!creature->LoadFromDB(db_guid, map, true))
 #endif
                 {
                     delete creature;
@@ -1779,7 +1823,7 @@ namespace LuaGlobalFunctions
             QuaternionData rot = QuaternionData::fromEulerAnglesZYX(o, 0.f, 0.f);
             if (!object->Create(guidLow, objectInfo->entry, map, phase, Position(x, y, z, o), rot, 0, GO_STATE_READY))
 #else
-            uint32 guidLow = sObjectMgr->GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+            uint32 guidLow = map->GenerateLowGuid<HighGuid::GameObject>();
             if (!object->Create(guidLow, entry, map, phase, x, y, z, o, G3D::Quat(0.0f, 0.0f, 0.0f, 0.0f), 100, GO_STATE_READY))
 #endif
             {
@@ -1795,11 +1839,7 @@ namespace LuaGlobalFunctions
             {
                 // fill the gameobject data and save to the db
                 object->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), phase);
-#ifndef AZEROTHCORE
                 guidLow = object->GetSpawnId();
-#else
-                guidLow = object->GetDBTableGUIDLow();
-#endif
 
                 // delete the old object and do a clean load from DB with a fresh new GameObject instance.
                 // this is required to avoid weird behavior and memory leaks
@@ -1847,7 +1887,11 @@ namespace LuaGlobalFunctions
         if (opcode >= NUM_MSG_TYPES)
             return luaL_argerror(L, 1, "valid opcode expected");
 
+#if defined CMANGOS && defined CLASSIC
+        Eluna::Push(L, new WorldPacket((Opcodes)opcode, size));
+#else
         Eluna::Push(L, new WorldPacket((OpcodesList)opcode, size));
+#endif
         return 1;
     }
 
@@ -1988,7 +2032,7 @@ namespace LuaGlobalFunctions
         switch (banMode)
         {
             case BAN_ACCOUNT:
-#if defined TRINITY || AZEROTHCORE
+#ifndef CMANGOS
                 if (!Utf8ToUpperOnlyLatin(nameOrIP))
                     return luaL_argerror(L, 2, "invalid account name");
 #else
@@ -2089,6 +2133,7 @@ namespace LuaGlobalFunctions
      * @param uint32 cod = 0 : cod money amount
      * @param uint32 entry = 0 : entry of an [Item] to send with mail
      * @param uint32 amount = 0 : amount of the [Item] to send with mail
+     * @return uint32 itemGUIDlow : low GUID of the item. Up to 12 values returned, returns nil if no further items are sent
      */
     int SendMail(lua_State* L)
     {
@@ -2118,10 +2163,8 @@ namespace LuaGlobalFunctions
             draft.SetMoney(money);
 #endif
 
-#if defined TRINITY
+#if defined TRINITY || defined AZEROTHCORE
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-#elif defined AZEROTHCORE
-        SQLTransaction trans = CharacterDatabase.BeginTransaction();
 #endif
         uint8 addedItems = 0;
         while (addedItems <= MAX_MAIL_ITEMS && i + 2 <= argAmount)
@@ -2152,6 +2195,11 @@ namespace LuaGlobalFunctions
                 item->SaveToDB();
 #endif
                 draft.AddItem(item);
+#if defined TRINITY || AZEROTHCORE
+                Eluna::Push(L, item->GetGUID().GetCounter());
+#else
+                Eluna::Push(L, item->GetGUIDLow());
+#endif
                 ++addedItems;
             }
         }
@@ -2163,7 +2211,7 @@ namespace LuaGlobalFunctions
 #else
         draft.SendMailTo(MailReceiver(receiverPlayer, MAKE_NEW_GUID(receiverGUIDLow, 0, HIGHGUID_PLAYER)), sender);
 #endif
-        return 0;
+        return addedItems;
     }
 
     /**
@@ -2389,7 +2437,12 @@ namespace LuaGlobalFunctions
             nodeEntry->z = entry.z;
             nodeEntry->MountCreatureID[0] = mountH;
             nodeEntry->MountCreatureID[1] = mountA;
+#ifndef CMANGOS
             sTaxiNodesStore.SetEntry(nodeId++, nodeEntry);
+#else
+            sTaxiNodesStore.InsertEntry(nodeEntry, nodeId++);
+#endif
+
 #ifndef AZEROTHCORE
             sTaxiPathNodesByPath[pathId].set(index++, new TaxiPathNodeEntry(entry));
 #else
@@ -2404,8 +2457,11 @@ namespace LuaGlobalFunctions
         pathEntry->FromTaxiNode = startNode;
         pathEntry->ToTaxiNode = nodeId - 1;
         pathEntry->ID = pathId;
-        pathEntry->Cost = price;
+#ifndef CMANGOS
         sTaxiPathStore.SetEntry(pathId, pathEntry);
+#else
+        sTaxiPathStore.InsertEntry(pathEntry, pathId);
+#endif
         Eluna::Push(L, pathId);
         return 1;
     }
@@ -2752,7 +2808,7 @@ namespace LuaGlobalFunctions
      *
      * @proto (entry)
      * @proto (entry, event_type)
-     * @param uint64 guid : the GUID of a single [Creature] whose handlers will be cleared
+     * @param ObjectGuid guid : the GUID of a single [Creature] whose handlers will be cleared
      * @param uint32 instance_id : the instance ID of a single [Creature] whose handlers will be cleared
      * @param uint32 event_type : the event whose handlers will be cleared, see [Global:RegisterCreatureEvent]
      */
@@ -2762,7 +2818,7 @@ namespace LuaGlobalFunctions
 
         if (lua_isnoneornil(L, 3))
         {
-            uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
+            ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
             uint32 instanceId = Eluna::CHECKVAL<uint32>(L, 2);
 
             Eluna* E = Eluna::GetEluna(L);
@@ -2771,7 +2827,7 @@ namespace LuaGlobalFunctions
         }
         else
         {
-            uint64 guid = Eluna::CHECKVAL<uint64>(L, 1);
+            ObjectGuid guid = Eluna::CHECKVAL<ObjectGuid>(L, 1);
             uint32 instanceId = Eluna::CHECKVAL<uint32>(L, 2);
             uint32 event_type = Eluna::CHECKVAL<uint32>(L, 3);
             Eluna::GetEluna(L)->CreatureUniqueBindings->Clear(Key((Hooks::CreatureEvents)event_type, guid, instanceId));
