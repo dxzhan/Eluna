@@ -37,7 +37,6 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "WorldSession.h"
-#include "WorldPacket.h"
 #else
 #include "Accounts/AccountMgr.h"
 #include "AuctionHouse/AuctionHouseMgr.h"
@@ -68,8 +67,8 @@
 #include "Spells/SpellMgr.h"
 #include "Entities/TemporarySpawn.h"
 #include "Server/WorldSession.h"
-#include "Server/WorldPacket.h"
 #endif
+#include "WorldPacket.h"
 
 #if defined TRINITY
 #include "SpellHistory.h"
@@ -77,7 +76,9 @@
 
 #if defined AZEROTHCORE
 #include "MapMgr.h"
-#elif !defined CMANGOS
+#elif defined CMANGOS
+#include "Maps/MapManager.h"
+#else
 #include "MapManager.h"
 #endif
 

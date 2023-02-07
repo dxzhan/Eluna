@@ -499,7 +499,11 @@ namespace LuaGlobalFunctions
         if (!areaEntry)
             return luaL_argerror(L, 1, "valid Area or Zone ID expected");
 
+#if defined(TRINITY)
         Eluna::Push(L, areaEntry->AreaName[locale]);
+#else
+        Eluna::Push(L, areaEntry->area_name[locale]);
+#endif
         return 1;
     }
 
@@ -2454,8 +2458,15 @@ namespace LuaGlobalFunctions
             return 1;
         sTaxiPathSetBySource[startNode][nodeId - 1] = TaxiPathBySourceAndDestination(pathId, price);
         TaxiPathEntry* pathEntry = new TaxiPathEntry();
+#ifdef TRINITY
         pathEntry->FromTaxiNode = startNode;
         pathEntry->ToTaxiNode = nodeId - 1;
+        pathEntry->Cost = price;
+#else
+        pathEntry->from = startNode;
+        pathEntry->to = nodeId - 1;
+        pathEntry->price = price;
+#endif
         pathEntry->ID = pathId;
 #ifndef CMANGOS
         sTaxiPathStore.SetEntry(pathId, pathEntry);

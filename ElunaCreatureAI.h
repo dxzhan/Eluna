@@ -120,7 +120,7 @@ struct ElunaCreatureAI : CreatureAI
 #elif defined(TRINITY) || CMANGOS
     void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo) override
 #else
-    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType damageType, SpellInfo const* spellInfo = nullptr) override
+    void DamageTaken(Unit* attacker, uint32& damage) override
 #endif
     {
         if (!sEluna->DamageTaken(me, attacker, damage))
@@ -132,7 +132,7 @@ struct ElunaCreatureAI : CreatureAI
 #elif defined CMANGOS
             CreatureAI::DamageTaken(attacker, damage, damageType, spellInfo);
 #else
-            ScriptedAI::DamageTaken(attacker, damage, damageType, spellInfo);
+            ScriptedAI::DamageTaken(attacker, damage);
 #endif
         }
     }

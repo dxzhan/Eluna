@@ -146,7 +146,7 @@ namespace LuaCreature
     {
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(AZEROTHCORE)
         Eluna::Push(L, creature->isTappedBy(player));
 #else
         Eluna::Push(L, creature->IsTappedBy(player));
@@ -231,7 +231,7 @@ namespace LuaCreature
      */
     int IsElite(lua_State* L, Creature* creature)
     {
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#ifdef AZEROTHCORE
         Eluna::Push(L, creature->isElite());
 #else
         Eluna::Push(L, creature->IsElite());
@@ -297,7 +297,7 @@ namespace LuaCreature
      */
     int IsWorldBoss(lua_State* L, Creature* creature)
     {
-#if defined(TRINITY) || defined(AZEROTHCORE)
+#if defined(AZEROTHCORE)
         Eluna::Push(L, creature->isWorldBoss());
 #else
         Eluna::Push(L, creature->IsWorldBoss());
@@ -1265,9 +1265,9 @@ namespace LuaCreature
     {
         uint32 msTimeToDespawn = Eluna::CHECKVAL<uint32>(L, 2, 0);
 
-#if defined TRINITY 
+#if defined(TRINITY)
         creature->DespawnOrUnsummon(Milliseconds(msTimeToDespawn));
-#elif defined AZEROTHCORE
+#elif defined(AZEROTHCORE)
         creature->DespawnOrUnsummon(msTimeToDespawn);
 #else
         creature->ForcedDespawn(msTimeToDespawn);

@@ -105,7 +105,7 @@ namespace LuaUnit
     {
         Creature* creature = Eluna::CHECKOBJ<Creature>(L, 2);
 
-#if defined TRINITY || AZEROTHCORE
+#if defined TRINITY
         Eluna::Push(L, unit->IsInAccessiblePlaceFor(creature));
 #else
         Eluna::Push(L, unit->isInAccessablePlaceFor(creature));
@@ -296,10 +296,10 @@ namespace LuaUnit
      */
     int IsDead(lua_State* L, Unit* unit)
     {
-#if defined (MANGOS) || CMANGOS
+#if defined (MANGOS) || CMANGOS || TRINITY
         Eluna::Push(L, unit->IsDead());
 #else
-        Eluna::Push(L, unit->IsDead());
+        Eluna::Push(L, unit->isDead());
 #endif
         return 1;
     }
@@ -311,10 +311,10 @@ namespace LuaUnit
      */
     int IsDying(lua_State* L, Unit* unit)
     {
-#if defined (MANGOS) || CMANGOS
+#if defined (MANGOS) || CMANGOS || TRINITY
         Eluna::Push(L, unit->IsDying());
 #else
-        Eluna::Push(L, unit->IsDying());
+        Eluna::Push(L, unit->isDying());
 #endif
         return 1;
     }
@@ -397,7 +397,11 @@ namespace LuaUnit
      */
     int IsAttackingPlayer(lua_State* L, Unit* unit)
     {
+#ifdef TRINITY
+        Eluna::Push(L, unit->IsAttackingPlayer());
+#else
         Eluna::Push(L, unit->isAttackingPlayer());
+#endif
         return 1;
     }
 
@@ -1162,7 +1166,11 @@ namespace LuaUnit
         if (!entry)
             return 1;
 
+#ifdef TRINITY
         Eluna::Push(L, entry->Name[locale]);
+#else
+        Eluna::Push(L, entry->name[locale]);
+#endif
         return 1;
     }
 
@@ -1201,7 +1209,11 @@ namespace LuaUnit
         if (!entry)
             return 1;
 
+#ifdef TRINITY
         Eluna::Push(L, entry->Name[locale]);
+#else
+        Eluna::Push(L, entry->name[locale]);
+#endif
         return 1;
     }
 
@@ -2067,8 +2079,9 @@ namespace LuaUnit
      */
     int PerformEmote(lua_State* L, Unit* unit)
     {
-#if defined TRINITY
-        unit->HandleEmoteCommand(Eluna::CHECKVAL<uint32>(L, 2));
+#ifdef TRINITY
+        Emote emote = static_cast<Emote>(Eluna::CHECKVAL<uint32>(L, 2));
+        unit->HandleEmoteCommand(emote);
 #else
         unit->HandleEmoteCommand(Eluna::CHECKVAL<uint32>(L, 2));
 #endif

@@ -19,7 +19,7 @@
 #include "Server/DBCStores.h"
 #include "Util/Timer.h"
 #endif
-#if defined MANGOS
+#if defined(MANGOS) || CMANGOS
 #include "Timer.h"
 #endif
 
