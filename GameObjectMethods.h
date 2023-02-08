@@ -23,7 +23,7 @@ namespace LuaGameObject
         uint32 questId = Eluna::CHECKVAL<uint32>(L, 2);
 
 #if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, go->hasQuest(questId));
+        Eluna::Push(L, go->HasQuest(questId));
 #else
         Eluna::Push(L, go->HasQuest(questId));
 #endif
