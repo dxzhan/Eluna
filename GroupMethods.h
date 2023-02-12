@@ -47,7 +47,7 @@ namespace LuaGroup
 #ifdef CMANGOS
         Eluna::Push(L, group->IsLFGGroup());
 #else
-        Eluna::Push(L, group->isLFGGroup());
+        Eluna::Push(L, group->IsLFGGroup());
 #endif
         return 1;
     }
@@ -63,7 +63,7 @@ namespace LuaGroup
 #ifdef CMANGOS
         Eluna::Push(L, group->IsRaidGroup());
 #else
-        Eluna::Push(L, group->isRaidGroup());
+        Eluna::Push(L, group->IsRaidGroup());
 #endif
         return 1;
     }
@@ -78,7 +78,7 @@ namespace LuaGroup
 #ifdef CMANGOS
         Eluna::Push(L, group->IsBattleGroup());        
 #else
-        Eluna::Push(L, group->isBGGroup());
+        Eluna::Push(L, group->IsBGGroup());
 #endif
         return 1;
     }

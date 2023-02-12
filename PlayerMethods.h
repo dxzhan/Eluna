@@ -338,7 +338,7 @@ namespace LuaPlayer
 #ifdef CMANGOS
         Eluna::Push(L, player->IsMoving());
 #else
-        Eluna::Push(L, player->isMoving());
+        Eluna::Push(L, player->IsMoving());
 #endif
         return 1;
     }
@@ -392,7 +392,7 @@ namespace LuaPlayer
      */
     int IsInGroup(lua_State* L, Player* player)
     {
-        Eluna::Push(L, (player->GetGroup() != NULL));
+        Eluna::Push(L, (player->GetGroup() != nullptr));
         return 1;
     }
 
@@ -3033,7 +3033,7 @@ namespace LuaPlayer
             player->ModifyMoney(-ReqOrRewMoney);
 
 #ifdef TRINITY
-        if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+        if (sWorld->GetBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
         {
             // prepare Quest Tracker datas
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_QUEST_TRACK_GM_COMPLETE);
@@ -4106,7 +4106,7 @@ namespace LuaPlayer
         // Get correct existing group if any
         Group* group = player->GetGroup();
 #ifndef CMANGOS
-        if (group && group->isBGGroup())
+        if (group && group->IsBGGroup())
 #else
         if (group && group->IsBattleGroup())
 #endif
