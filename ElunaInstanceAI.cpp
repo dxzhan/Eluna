@@ -42,11 +42,8 @@ void ElunaInstanceAI::Load(const char* data)
 
     if (data[0] == '\0')
     {
-#ifdef TRINITY
-        ASSERT(!sEluna->HasInstanceData(reinterpret_cast<const Map*>(instance)));
-#else
         ASSERT(!sEluna->HasInstanceData(instance));
-#endif
+
         // Create a new table for instance data.
         lua_State* L = sEluna->L;
         lua_newtable(L);

@@ -2619,6 +2619,7 @@ namespace LuaPlayer
         uint16 position = Eluna::CHECKVAL<uint16>(L, 2);
         bool takeCost = Eluna::CHECKVAL<bool>(L, 3, true);
         float discountMod = Eluna::CHECKVAL<float>(L, 4, 1.0f);
+
 #ifdef CLASSIC
         player->DurabilityRepair(position, takeCost, discountMod);
 #elif defined(TRINITY)

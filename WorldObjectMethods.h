@@ -1119,10 +1119,10 @@ namespace LuaWorldObject
         WorldObject* target = Eluna::CHECKOBJ<WorldObject>(L, 2);
         float arc = Eluna::CHECKVAL<float>(L, 3, static_cast<float>(M_PI));
 
-#ifdef MANGOS
+#if defined MANGOS || TRINITY
         Eluna::Push(L, obj->IsInFront(target, arc));
 #else
-        Eluna::Push(L, obj->IsInFront(target, arc));
+        Eluna::Push(L, obj->isInFront(target, arc));
 #endif
         return 1;
     }
@@ -1139,10 +1139,10 @@ namespace LuaWorldObject
         WorldObject* target = Eluna::CHECKOBJ<WorldObject>(L, 2);
         float arc = Eluna::CHECKVAL<float>(L, 3, static_cast<float>(M_PI));
 
-#ifdef MANGOS
+#if defined MANGOS || TRINITY
         Eluna::Push(L, obj->IsInBack(target, arc));
 #else
-        Eluna::Push(L, obj->IsInBack(target, arc));
+        Eluna::Push(L, obj->isInBack(target, arc));
 #endif
         return 1;
     }

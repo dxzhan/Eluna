@@ -44,10 +44,10 @@ namespace LuaGroup
      */
     int IsLFGGroup(lua_State* L, Group* group)
     {
-#ifdef CMANGOS
+#if defined CMANGOS || TRINITY
         Eluna::Push(L, group->IsLFGGroup());
 #else
-        Eluna::Push(L, group->IsLFGGroup());
+        Eluna::Push(L, group->isLFGGroup());
 #endif
         return 1;
     }
@@ -60,10 +60,10 @@ namespace LuaGroup
      */
     int IsRaidGroup(lua_State* L, Group* group)
     {
-#ifdef CMANGOS
+#if defined CMANGOS || TRINITY
         Eluna::Push(L, group->IsRaidGroup());
 #else
-        Eluna::Push(L, group->IsRaidGroup());
+        Eluna::Push(L, group->isRaidGroup());
 #endif
         return 1;
     }
@@ -76,9 +76,13 @@ namespace LuaGroup
     int IsBGGroup(lua_State* L, Group* group)
     {
 #ifdef CMANGOS
-        Eluna::Push(L, group->IsBattleGroup());        
+        Eluna::Push(L, group->IsBattleGroup());
 #else
+    #ifdef TRINITY
         Eluna::Push(L, group->IsBGGroup());
+    #else
+        Eluna::Push(L, group->isBGGroup());
+    #endif
 #endif
         return 1;
     }

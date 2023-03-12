@@ -1556,11 +1556,8 @@ namespace LuaGlobalFunctions
                     Eluna::Push(L);
                     return 1;
                 }
-#ifdef CMANGOS
-                if (!pCreature->Create(lowguid, lowguid, pos, cinfo))
-#else
+
                 if (!pCreature->Create(lowguid, pos, cinfo))
-#endif
                 {
                     delete pCreature;
                     Eluna::Push(L);
@@ -1613,7 +1610,7 @@ namespace LuaGlobalFunctions
 #ifndef CMANGOS
                 if (!pCreature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, TEAM_NONE))
 #else
-                if (!pCreature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
+                if (!pCreature->Create(map->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
 #endif
                 {
                     delete pCreature;
@@ -1661,12 +1658,8 @@ namespace LuaGlobalFunctions
                 }
 
                 GameObject* pGameObj = new GameObject;
-#if ((defined(TBC) || defined(CLASSIC)) && !defined(CMANGOS))
+#if (defined(TBC) || defined(CLASSIC))
                 if (!pGameObj->Create(db_lowGUID, gInfo->id, map, x, y, z, o))
-#elif ((defined(TBC) || defined(CLASSIC)) && defined(CMANGOS))
-                if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, x, y, z, o))
-#elif defined CMANGOS
-                if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, phase, x, y, z, o))
 #else
                 if (!pGameObj->Create(db_lowGUID, gInfo->id, map, phase, x, y, z, o))
 #endif
@@ -1713,12 +1706,8 @@ namespace LuaGlobalFunctions
             {
                 GameObject* pGameObj = new GameObject;
 
-#if ((defined(TBC) || defined(CLASSIC)) && !defined(CMANGOS))
+#if (defined(TBC) || defined(CLASSIC))
                 if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, x, y, z, o))
-#elif ((defined(TBC) || defined(CLASSIC)) && defined(CMANGOS))
-                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, x, y, z, o))
-#elif defined CMANGOS
-                if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, phase, x, y, z, o))
 #else
                 if (!pGameObj->Create(map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), entry, map, phase, x, y, z, o))
 #endif
