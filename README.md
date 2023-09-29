@@ -48,6 +48,8 @@ Core plugin modules for Eluna:
 
 - [AzerothCore Eluna Module](https://github.com/azerothcore/mod-eluna-lua-engine)
 
+[Cataclysm Preservation Project](https://github.com/Niam5/ElunaCataPreservation) - maintained by [Niam5](https://github.com/Niam5)
+
 ## Links
 
 * [MaNGOS](http://getmangos.eu/)
