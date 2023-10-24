@@ -378,11 +378,17 @@ public:
     void OnRepop(Player* pPlayer);
     void OnResurrect(Player* pPlayer);
     void OnQuestAbandon(Player* pPlayer, uint32 questId);
+    void OnQuestStatusChanged(Player* pPlayer, uint32 questId, uint8 status);
     void OnLearnTalents(Player* pPlayer, uint32 talentId, uint32 talentRank, uint32 spellid);
+    void OnSkillChange(Player* pPlayer, uint32 skillId, uint32 skillValue);
+    void OnLearnSpell(Player* pPlayer, uint32 spellid);
     InventoryResult OnCanUseItem(const Player* pPlayer, uint32 itemEntry);
     void OnLuaStateClose();
     void OnLuaStateOpen();
     bool OnAddonMessage(Player* sender, uint32 type, std::string& msg, Player* receiver, Guild* guild, Group* group, Channel* channel);
+    bool OnTradeInit(Player* trader, Player* tradee);
+    bool OnTradeAccept(Player* trader, Player* tradee);
+    bool OnSendMail(Player* sender, ObjectGuid recipientGuid);
 
     /* Item */
     void OnDummyEffect(WorldObject* pCaster, uint32 spellId, SpellEffIndex effIndex, Item* pTarget);
@@ -392,6 +398,7 @@ public:
     bool OnItemGossip(Player* pPlayer, Item* pItem, SpellCastTargets const& targets);
     bool OnExpire(Player* pPlayer, ItemTemplate const* pProto);
     bool OnRemove(Player* pPlayer, Item* item);
+    void OnAdd(Player* pPlayer, Item* item);
     void HandleGossipSelectOption(Player* pPlayer, Item* item, uint32 sender, uint32 action, const std::string& code);
 
     /* Creature */
@@ -460,6 +467,7 @@ public:
     void OnPVPKill(Player* pKiller, Player* pKilled);
     void OnCreatureKill(Player* pKiller, Creature* pKilled);
     void OnPlayerKilledByCreature(Creature* pKiller, Player* pKilled);
+    void OnPlayerKilledByEnvironment(Player* pKilled, uint8 damageType);
     void OnLevelChanged(Player* pPlayer, uint8 oldLevel);
     void OnFreeTalentPointsChanged(Player* pPlayer, uint32 newPoints);
     void OnTalentsReset(Player* pPlayer, bool noCost);
@@ -487,8 +495,10 @@ public:
     void OnSave(Player* pPlayer);
     void OnBindToInstance(Player* pPlayer, Difficulty difficulty, uint32 mapid, bool permanent);
     void OnUpdateZone(Player* pPlayer, uint32 newZone, uint32 newArea);
+    void OnUpdateArea(Player* pPlayer, uint32 oldArea, uint32 newArea);
     void OnMapChanged(Player* pPlayer);
     void HandleGossipSelectOption(Player* pPlayer, uint32 menuId, uint32 sender, uint32 action, const std::string& code);
+    void OnAchievementComplete(Player* pPlayer, uint32 achievementId);
 
 #ifndef CLASSIC
 #ifndef TBC
@@ -543,6 +553,7 @@ public:
 #else
     void OnCreate(Group* group, ObjectGuid leaderGuid, GroupType groupType);
 #endif
+    bool OnMemberAccept(Group* group, Player* player);
 
     /* Map */
     void OnCreate(Map* map);
