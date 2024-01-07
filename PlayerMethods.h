@@ -335,10 +335,10 @@ namespace LuaPlayer
      */
     int IsMoving(lua_State* L, Player* player) // enable for unit when mangos support it
     {
-#ifdef CMANGOS
+#if defined CMANGOS || TRINITY
         Eluna::Push(L, player->IsMoving());
 #else
-        Eluna::Push(L, player->IsMoving());
+        Eluna::Push(L, player->isMoving());
 #endif
         return 1;
     }

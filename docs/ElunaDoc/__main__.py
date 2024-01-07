@@ -63,13 +63,13 @@ if __name__ == '__main__':
     shutil.copytree('ElunaDoc/static', 'build/static')
 
     # Load up all files with methods we need to parse.
-    print 'Finding Eluna method files...'
+    print ('Finding Eluna method files...')
     class_files = find_class_files('../')
 
     # Parse all the method files.
     classes = []
     for f in class_files:
-        print 'Parsing file {}...'.format(f.name)
+        print( 'Parsing file {}...'.format(f.name))
         classes.append(ClassParser.parse_file(f))
         f.close()
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     render('date.js', 'date.js', level=0, currdate=time.strftime("%d/%m/%Y"))
 
     for class_ in classes:
-        print 'Rending pages for class {}...'.format(class_.name)
+        print ('Rending pages for class {}...'.format(class_.name))
 
         # Make a folder for the class.
         os.mkdir('build/' + class_.name)

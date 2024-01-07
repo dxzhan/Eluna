@@ -362,16 +362,19 @@ void Eluna::GetScripts(std::string path)
         for (boost::filesystem::directory_iterator dir_iter(someDir); dir_iter != end_iter; ++dir_iter)
         {
             std::string fullpath = dir_iter->path().generic_string();
-
+            // exclude .git .gitignore directory or file
+            std::string name = dir_iter->path().filename().generic_string().c_str();
+            if (name[0] == '.')
+            {
+                continue;
+            }
             // Check if file is hidden
 #ifdef ELUNA_WINDOWS
             DWORD dwAttrib = GetFileAttributes(fullpath.c_str());
             if (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_HIDDEN))
+            {
                 continue;
-#else
-            std::string name = dir_iter->path().filename().generic_string().c_str();
-            if (name[0] == '.')
-                continue;
+            }
 #endif
 
             // load subfolder
@@ -651,7 +654,7 @@ void Eluna::Push(lua_State* luastate, const int i)
 }
 void Eluna::Push(lua_State* luastate, const unsigned int u)
 {
-    lua_pushunsigned(luastate, u);
+    lua_pushinteger(luastate, u);
 }
 void Eluna::Push(lua_State* luastate, const double d)
 {

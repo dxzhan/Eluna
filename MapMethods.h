@@ -63,7 +63,11 @@ namespace LuaMap
      */
     int IsEmpty(lua_State* L, Map* map)
     {
+#if defined TRINITY
         Eluna::Push(L, map->IsEmpty());
+#else
+        Eluna::Push(L, map->isEmpty());
+#endif
         return 1;
     }
 

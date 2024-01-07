@@ -176,8 +176,8 @@ namespace LuaItem
     int HasQuest(lua_State* L, Item* item)
     {
         uint32 quest = Eluna::CHECKVAL<uint32>(L, 2);
-#if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, item->HasQuest(quest));
+#if defined AZEROTHCORE
+        Eluna::Push(L, item->hasQuest(quest));
 #else
         Eluna::Push(L, item->HasQuest(quest));
 #endif

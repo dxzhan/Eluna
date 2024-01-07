@@ -78,8 +78,8 @@ namespace LuaCreature
     {
         uint32 quest_id = Eluna::CHECKVAL<uint32>(L, 2);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
-        Eluna::Push(L, creature->HasInvolvedQuest(quest_id));
+#if defined(AZEROTHCORE)
+        Eluna::Push(L, creature->hasInvolvedQuest(quest_id));
 #else
         Eluna::Push(L, creature->HasInvolvedQuest(quest_id));
 #endif
@@ -162,8 +162,8 @@ namespace LuaCreature
      */
     int HasLootRecipient(lua_State* L, Creature* creature)
     {
-#if defined(TRINITY) || defined(AZEROTHCORE)
-        Eluna::Push(L, creature->HasLootRecipient());
+#if defined(AZEROTHCORE)
+        Eluna::Push(L, creature->hasLootRecipient());
 #else
         Eluna::Push(L, creature->HasLootRecipient());
 #endif
@@ -358,8 +358,8 @@ namespace LuaCreature
     {
         uint32 questId = Eluna::CHECKVAL<uint32>(L, 2);
 
-#if defined(TRINITY) || defined(AZEROTHCORE)
-        Eluna::Push(L, creature->HasQuest(questId));
+#if defined(AZEROTHCORE)
+        Eluna::Push(L, creature->hasQuest(questId));
 #else
         Eluna::Push(L, creature->HasQuest(questId));
 #endif
