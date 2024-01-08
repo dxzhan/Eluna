@@ -282,7 +282,7 @@ namespace LuaPlayer
      */
     int IsMoving(lua_State* L, Player* player) // enable for unit when mangos support it
     {
-        Eluna::Push(L, player->isMoving());
+        Eluna::Push(L, player->IsMoving());
         return 1;
     }
 
@@ -355,7 +355,7 @@ namespace LuaPlayer
      */
     int IsImmuneToDamage(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isTotalImmune());
+        Eluna::Push(L, player->IsTotalImmune());
         return 1;
     }
 
@@ -442,7 +442,7 @@ namespace LuaPlayer
      */
     int IsDND(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isDND());
+        Eluna::Push(L, player->IsDND());
         return 1;
     }
 
@@ -453,7 +453,7 @@ namespace LuaPlayer
      */
     int IsAFK(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isAFK());
+        Eluna::Push(L, player->IsAFK());
         return 1;
     }
 
@@ -511,7 +511,7 @@ namespace LuaPlayer
     {
         Unit* victim = Eluna::CHECKOBJ<Unit>(L, 2);
 
-        Eluna::Push(L, player->isHonorOrXPTarget(victim));
+        Eluna::Push(L, player->IsHonorOrXPTarget(victim));
         return 1;
     }
 
@@ -531,7 +531,7 @@ namespace LuaPlayer
 
     int IsGMVisible(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isGMVisible());
+        Eluna::Push(L, player->IsGMVisible());
         return 1;
     }
 
@@ -542,13 +542,13 @@ namespace LuaPlayer
      */
     int IsTaxiCheater(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isTaxiCheater());
+        Eluna::Push(L, player->IsTaxiCheater());
         return 1;
     }
 
     int IsGMChat(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isGMChat());
+        Eluna::Push(L, player->IsGMChat());
         return 1;
     }
 
@@ -559,7 +559,7 @@ namespace LuaPlayer
      */
     int IsAcceptingWhispers(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isAcceptWhispers());
+        Eluna::Push(L, player->IsAcceptWhispers());
         return 1;
     }
 
@@ -651,13 +651,13 @@ namespace LuaPlayer
 
     int InRandomLfgDungeon(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->inRandomLfgDungeon());
+        Eluna::Push(L, player->InRandomLfgDungeon());
         return 1;
     }
 
     int IsUsingLfg(lua_State* L, Player* player)
     {
-        Eluna::Push(L, player->isUsingLfg());
+        Eluna::Push(L, player->IsUsingLfg());
         return 1;
     }
 
@@ -2688,7 +2688,7 @@ namespace LuaPlayer
         if (ReqOrRewMoney < 0)
             player->ModifyMoney(-ReqOrRewMoney);
 
-        if (sWorld->getBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
+        if (sWorld->GetBoolConfig(CONFIG_QUEST_ENABLE_QUEST_TRACKER)) // check if Quest Tracker is enabled
         {
             // prepare Quest Tracker datas
             CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_QUEST_TRACK_GM_COMPLETE);
@@ -3614,7 +3614,7 @@ namespace LuaPlayer
         // Get correct existing group if any
         Group* group = player->GetGroup();
 
-        if (group && group->isBGGroup())
+        if (group && group->IsBGGroup())
             group = player->GetOriginalGroup();
 
         bool success = false;

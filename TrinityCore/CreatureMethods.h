@@ -66,7 +66,7 @@ namespace LuaCreature
     {
         uint32 quest_id = Eluna::CHECKVAL<uint32>(L, 2);
 
-        Eluna::Push(L, creature->hasInvolvedQuest(quest_id));
+        Eluna::Push(L, creature->HasInvolvedQuest(quest_id));
         return 1;
     }
 
@@ -81,7 +81,7 @@ namespace LuaCreature
     {
         bool mustBeDead = Eluna::CHECKVAL<bool>(L, 2, false);
 
-        Eluna::Push(L, creature->isTargetableForAttack(mustBeDead));
+        Eluna::Push(L, creature->IsTargetableForAttack(mustBeDead));
         return 1;
     }
 
@@ -126,7 +126,7 @@ namespace LuaCreature
     {
         Player* player = Eluna::CHECKOBJ<Player>(L, 2);
 
-        Eluna::Push(L, creature->isTappedBy(player));
+        Eluna::Push(L, creature->IsTappedBy(player));
         return 1;
     }
 
@@ -138,7 +138,7 @@ namespace LuaCreature
      */
     int HasLootRecipient(lua_State* L, Creature* creature)
     {
-        Eluna::Push(L, creature->hasLootRecipient());
+        Eluna::Push(L, creature->HasLootRecipient());
         return 1;
     }
 
@@ -198,7 +198,7 @@ namespace LuaCreature
      */
     int IsElite(lua_State* L, Creature* creature)
     {
-        Eluna::Push(L, creature->isElite());
+        Eluna::Push(L, creature->IsElite());
         return 1;
     }
 
@@ -259,7 +259,7 @@ namespace LuaCreature
      */
     int IsWorldBoss(lua_State* L, Creature* creature)
     {
-        Eluna::Push(L, creature->isWorldBoss());
+        Eluna::Push(L, creature->IsWorldBoss());
         return 1;
     }
 
@@ -308,7 +308,7 @@ namespace LuaCreature
     {
         uint32 questId = Eluna::CHECKVAL<uint32>(L, 2);
 
-        Eluna::Push(L, creature->hasQuest(questId));
+        Eluna::Push(L, creature->HasQuest(questId));
         return 1;
     }
 
@@ -881,7 +881,7 @@ namespace LuaCreature
     {
         int32 state = Eluna::CHECKVAL<int32>(L, 2);
 
-        creature->setDeathState((DeathState)state);
+        creature->SetDeathState((DeathState)state);
         return 0;
     }
 

@@ -94,7 +94,7 @@ namespace LuaUnit
     {
         Creature* creature = Eluna::CHECKOBJ<Creature>(L, 2);
 
-        Eluna::Push(L, unit->isInAccessiblePlaceFor(creature));
+        Eluna::Push(L, unit->IsInAccessiblePlaceFor(creature));
         return 1;
     }
 
@@ -237,7 +237,7 @@ namespace LuaUnit
      */
     int IsDead(lua_State* L, Unit* unit)
     {
-        Eluna::Push(L, unit->isDead());
+        Eluna::Push(L, unit->IsDead());
         return 1;
     }
 
@@ -248,7 +248,7 @@ namespace LuaUnit
      */
     int IsDying(lua_State* L, Unit* unit)
     {
-        Eluna::Push(L, unit->isDying());
+        Eluna::Push(L, unit->IsDying());
         return 1;
     }
 
@@ -314,7 +314,7 @@ namespace LuaUnit
      */
     int IsAttackingPlayer(lua_State* L, Unit* unit)
     {
-        Eluna::Push(L, unit->isAttackingPlayer());
+        Eluna::Push(L, unit->IsAttackingPlayer());
         return 1;
     }
 
@@ -466,7 +466,7 @@ namespace LuaUnit
 
     int IsMoving(lua_State* L, Unit* unit)
     {
-        Eluna::Push(L, unit->isMoving());
+        Eluna::Push(L, unit->IsMoving());
         return 1;
     }
 

@@ -1022,7 +1022,7 @@ namespace LuaWorldObject
         WorldObject* target = Eluna::CHECKOBJ<WorldObject>(L, 2);
         float arc = Eluna::CHECKVAL<float>(L, 3, static_cast<float>(M_PI));
 
-        Eluna::Push(L, obj->isInFront(target, arc));
+        Eluna::Push(L, obj->IsInFront(target, arc));
         return 1;
     }
 
@@ -1038,7 +1038,7 @@ namespace LuaWorldObject
         WorldObject* target = Eluna::CHECKOBJ<WorldObject>(L, 2);
         float arc = Eluna::CHECKVAL<float>(L, 3, static_cast<float>(M_PI));
 
-        Eluna::Push(L, obj->isInBack(target, arc));
+        Eluna::Push(L, obj->IsInBack(target, arc));
         return 1;
     }
 

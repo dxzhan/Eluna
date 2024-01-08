@@ -43,7 +43,7 @@ namespace LuaGroup
      */
     int IsLFGGroup(lua_State* L, Group* group)
     {
-        Eluna::Push(L, group->isLFGGroup());
+        Eluna::Push(L, group->IsLFGGroup());
         return 1;
     }
     
@@ -54,7 +54,7 @@ namespace LuaGroup
      */
     int IsRaidGroup(lua_State* L, Group* group)
     {
-        Eluna::Push(L, group->isRaidGroup());
+        Eluna::Push(L, group->IsRaidGroup());
         return 1;
     }
 
@@ -65,7 +65,7 @@ namespace LuaGroup
      */
     int IsBGGroup(lua_State* L, Group* group)
     {
-        Eluna::Push(L, group->isBGGroup());
+        Eluna::Push(L, group->IsBGGroup());
         return 1;
     }
 
@@ -159,7 +159,7 @@ namespace LuaGroup
 
     int IsBFGroup(lua_State* L, Group* group)
     {
-        Eluna::Push(L, group->isBFGroup());
+        Eluna::Push(L, group->IsBFGroup());
         return 1;
     }
 

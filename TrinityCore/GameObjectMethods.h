@@ -22,7 +22,7 @@ namespace LuaGameObject
     {
         uint32 questId = Eluna::CHECKVAL<uint32>(L, 2);
 
-        Eluna::Push(L, go->hasQuest(questId));
+        Eluna::Push(L, go->HasQuest(questId));
         return 1;
     }
 
@@ -55,7 +55,7 @@ namespace LuaGameObject
      */
     int IsActive(lua_State* L, GameObject* go)
     {
-        Eluna::Push(L, go->isActiveObject());
+        Eluna::Push(L, go->IsActiveObject());
         return 1;
     }
 
