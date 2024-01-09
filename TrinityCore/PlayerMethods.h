@@ -3304,16 +3304,21 @@ namespace LuaPlayer
         uint8 channel = Eluna::CHECKVAL<uint8>(L, 4);
         Player* receiver = Eluna::CHECKOBJ<Player>(L, 5);
 
-        std::string fullmsg = prefix + "\t" + message;
-
         WorldPacket data(SMSG_MESSAGECHAT, 100);
         data << uint8(channel);
         data << int32(LANG_ADDON);
         data << player->GET_GUID();
         data << uint32(0);
         data << receiver->GET_GUID();
+#ifdef CATA
+        data << prefix;
+        data << uint32(message.length() + 1);
+        data << message;
+#else
+        std::string fullmsg = prefix + "\t" + message;
         data << uint32(fullmsg.length() + 1);
         data << fullmsg;
+#endif
         data << uint8(0);
 
         receiver->GetSession()->SendPacket(&data);
@@ -3824,9 +3829,6 @@ namespace LuaPlayer
 #ifndef CATA
         { "GetArenaPoints", &LuaPlayer::GetArenaPoints },
         { "GetHonorPoints", &LuaPlayer::GetHonorPoints },
-#else
-        { "GetArenaPoints", nullptr }, 
-        { "GetHonorPoints", nullptr },
 #endif
         { "GetLifetimeKills", &LuaPlayer::GetLifetimeKills },
         { "GetPlayerIP", &LuaPlayer::GetPlayerIP },
@@ -3843,8 +3845,6 @@ namespace LuaPlayer
         { "GetRestBonus", &LuaPlayer::GetRestBonus },
 #ifndef CATA
         { "GetPhaseMaskForSpawn", &LuaPlayer::GetPhaseMaskForSpawn },
-#else
-        { "GetPhaseMaskForSpawn", nullptr },
 #endif
         { "GetReqKillOrCastCurrentCount", &LuaPlayer::GetReqKillOrCastCurrentCount },
         { "GetQuestStatus", &LuaPlayer::GetQuestStatus },
@@ -3890,18 +3890,11 @@ namespace LuaPlayer
         { "GetMailCount", &LuaPlayer::GetMailCount },
         { "GetXP", &LuaPlayer::GetXP },
         { "GetXPForNextLevel", &LuaPlayer::GetXPForNextLevel },
-#else
-        { "GetShieldBlockValue", nullptr },
-        { "GetMailCount", nullptr },
-        { "GetXP", nullptr },
-        { "GetXPForNextLevel", nullptr },
 #endif
 
         // Setters
 #ifndef CATA
         { "AdvanceSkillsToMax", &LuaPlayer::AdvanceSkillsToMax },
-#else
-        { "AdvanceSkillsToMax", nullptr },
 #endif
         { "AdvanceSkill", &LuaPlayer::AdvanceSkill },
         { "AdvanceAllSkills", &LuaPlayer::AdvanceAllSkills },
@@ -3913,9 +3906,6 @@ namespace LuaPlayer
 #ifndef CATA
         { "SetArenaPoints", &LuaPlayer::SetArenaPoints },
         { "SetHonorPoints", &LuaPlayer::SetHonorPoints },
-#else
-        { "SetArenaPoints", nullptr },
-        { "SetHonorPoints", nullptr },
 #endif
         { "SetLifetimeKills", &LuaPlayer::SetLifetimeKills },
         { "SetGameMaster", &LuaPlayer::SetGameMaster },
@@ -3931,8 +3921,6 @@ namespace LuaPlayer
         { "SetGuildRank", &LuaPlayer::SetGuildRank },
 #ifndef CATA
         { "SetMovement", &LuaPlayer::SetMovement },
-#else
-        { "SetMovement", nullptr },
 #endif
         { "SetSkill", &LuaPlayer::SetSkill },
         { "SetFactionForRace", &LuaPlayer::SetFactionForRace },
@@ -4007,9 +3995,6 @@ namespace LuaPlayer
 #ifndef CATA
         { "CanCompleteRepeatableQuest", &LuaPlayer::CanCompleteRepeatableQuest },
         { "CanRewardQuest", &LuaPlayer::CanRewardQuest },
-#else
-        { "CanCompleteRepeatableQuest", nullptr },
-        { "CanRewardQuest", nullptr },
 #endif
 
         // Gossip
@@ -4074,9 +4059,6 @@ namespace LuaPlayer
 #ifndef CATA
         { "ModifyHonorPoints", &LuaPlayer::ModifyHonorPoints },
         { "ModifyArenaPoints", &LuaPlayer::ModifyArenaPoints },
-#else
-        { "ModifyHonorPoints", nullptr },
-        { "ModifyArenaPoints", nullptr },
 #endif
         { "LeaveBattleground", &LuaPlayer::LeaveBattleground },
         { "BindToInstance", &LuaPlayer::BindToInstance },
@@ -4126,6 +4108,24 @@ namespace LuaPlayer
         { "ResetHonor", nullptr }, // classic only
         { "ClearHonorInfo", nullptr }, // classic only
         { "GainSpellComboPoints", nullptr }, // not implemented
+
+#ifdef CATA //Not implmented in TCPP
+        { "GetArenaPoints", nullptr },
+        { "GetHonorPoints", nullptr },
+        { "GetPhaseMaskForSpawn", nullptr },
+        { "GetShieldBlockValue", nullptr },
+        { "GetMailCount", nullptr },
+        { "GetXP", nullptr },
+        { "GetXPForNextLevel", nullptr },
+        { "AdvanceSkillsToMax", nullptr },
+        { "SetArenaPoints", nullptr },
+        { "SetHonorPoints", nullptr },
+        { "SetMovement", nullptr },
+        { "CanCompleteRepeatableQuest", nullptr },
+        { "CanRewardQuest", nullptr },
+        { "ModifyHonorPoints", nullptr },
+        { "ModifyArenaPoints", nullptr },
+#endif
 
         { NULL, NULL }
     };
