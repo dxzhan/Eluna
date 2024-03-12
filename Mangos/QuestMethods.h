@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -49,14 +49,11 @@ namespace LuaQuest
      * @param [QuestFlags] flag : all available flags can be seen above
      * @return bool hasFlag
      */
-    int HasFlag(lua_State* L, Quest* quest)
+    int HasFlag(Eluna* E, Quest* quest)
     {
-        uint32 flag = Eluna::CHECKVAL<uint32>(L, 2);
-#if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, quest->HasFlag(flag));
-#else
-        Eluna::Push(L, quest->HasQuestFlag((QuestFlags)flag));
-#endif
+        uint32 flag = E->CHECKVAL<uint32>(2);
+
+        E->Push(quest->HasQuestFlag((QuestFlags)flag));
         return 1;
     }
 
@@ -66,9 +63,9 @@ namespace LuaQuest
      *
      * @return bool isDaily
      */
-    int IsDaily(lua_State* L, Quest* quest)
+    int IsDaily(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->IsDaily());
+        E->Push(quest->IsDaily());
         return 1;
     }
 #endif
@@ -78,9 +75,9 @@ namespace LuaQuest
      *
      * @return bool isRepeatable
      */
-    int IsRepeatable(lua_State* L, Quest* quest)
+    int IsRepeatable(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->IsRepeatable());
+        E->Push(quest->IsRepeatable());
         return 1;
     }
 
@@ -89,9 +86,9 @@ namespace LuaQuest
      *
      * @return uint32 entryId
      */
-    int GetId(lua_State* L, Quest* quest)
+    int GetId(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetQuestId());
+        E->Push(quest->GetQuestId());
         return 1;
     }
 
@@ -100,9 +97,9 @@ namespace LuaQuest
      *
      * @return uint32 level
      */
-    int GetLevel(lua_State* L, Quest* quest)
+    int GetLevel(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetQuestLevel());
+        E->Push(quest->GetQuestLevel());
         return 1;
     }
 
@@ -111,9 +108,9 @@ namespace LuaQuest
      *
      * @return uint32 minLevel
      */
-    int GetMinLevel(lua_State* L, Quest* quest)
+    int GetMinLevel(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetMinLevel());
+        E->Push(quest->GetMinLevel());
         return 1;
     }
 
@@ -122,9 +119,9 @@ namespace LuaQuest
      *
      * @return int32 entryId
      */
-    int GetNextQuestId(lua_State* L, Quest* quest)
+    int GetNextQuestId(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetNextQuestId());
+        E->Push(quest->GetNextQuestId());
         return 1;
     }
 
@@ -133,9 +130,9 @@ namespace LuaQuest
      *
      * @return int32 entryId
      */
-    int GetPrevQuestId(lua_State* L, Quest* quest)
+    int GetPrevQuestId(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetPrevQuestId());
+        E->Push(quest->GetPrevQuestId());
         return 1;
     }
 
@@ -144,9 +141,9 @@ namespace LuaQuest
      *
      * @return int32 entryId
      */
-    int GetNextQuestInChain(lua_State* L, Quest* quest)
+    int GetNextQuestInChain(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetNextQuestInChain());
+        E->Push(quest->GetNextQuestInChain());
         return 1;
     }
 
@@ -155,13 +152,9 @@ namespace LuaQuest
      *
      * @return [QuestFlags] flags
      */
-    int GetFlags(lua_State* L, Quest* quest)
+    int GetFlags(Eluna* E, Quest* quest)
     {
-#if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, quest->GetFlags());
-#else
-        Eluna::Push(L, quest->GetQuestFlags());
-#endif
+        E->Push(quest->GetQuestFlags());
         return 1;
     }
 
@@ -172,17 +165,11 @@ namespace LuaQuest
      *
      * @return uint32 type
      */
-    int GetType(lua_State* L, Quest* quest)
+    int GetType(Eluna* E, Quest* quest)
     {
-        Eluna::Push(L, quest->GetType());
+        E->Push(quest->GetType());
         return 1;
     }
-
-    /*int GetMaxLevel(lua_State* L, Quest* quest)
-    {
-        Eluna::Push(L, quest->GetMaxLevel());
-        return 1;
-    }*/
     
     ElunaRegister<Quest> QuestMethods[] =
     {
@@ -201,12 +188,14 @@ namespace LuaQuest
         { "IsRepeatable", &LuaQuest::IsRepeatable },
 #ifndef CLASSIC
         { "IsDaily", &LuaQuest::IsDaily },
+#else
+        { "IsDaily", nullptr, METHOD_REG_NONE },
 #endif
 
         // Not implemented methods
-        { "GetMaxLevel", nullptr },  // not implemented
+        { "GetMaxLevel", nullptr, METHOD_REG_NONE },  // not implemented
 
-        { NULL, NULL }
+        { NULL, NULL, METHOD_REG_NONE }
     };
 };
 #endif

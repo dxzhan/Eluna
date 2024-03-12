@@ -1,14 +1,14 @@
 import os
 import shutil
-from types import FileType
+import typing
 from jinja2 import Environment, FileSystemLoader
 from typedecorator import params, returns
-from parser import ClassParser, MethodDoc
+from ElunaDoc.parser import ClassParser, MethodDoc
 import glob
 import time
 
 
-@returns([(str, FileType)])
+@returns([(str, typing.IO)])
 @params(search_path=str)
 def find_class_files(search_path):
     """Find and open all files containing Eluna class methods in `search_path`.
@@ -32,7 +32,7 @@ def make_renderer(template_path, link_parser_factory):
     """Return a function that can be used to render Jinja2 templates from the `template_path` directory."""
 
     # Set up jinja2 environment to load templates from the templates folder.
-    env = Environment(loader=FileSystemLoader(template_path), extensions=['jinja2.ext.with_'])
+    env = Environment(loader=FileSystemLoader(template_path))
 
 
     def inner(template_name, output_path, level, **kwargs):
@@ -64,13 +64,17 @@ if __name__ == '__main__':
 
     # Load up all files with methods we need to parse.
     # Hard-coded to the TC files for now. Will have to add core support later on.
-    print 'Finding Eluna method files...'
+    print('Finding Eluna method files...')
     class_files = find_class_files('../TrinityCore/')
 
     # Parse all the method files.
     classes = []
     for f in class_files:
+<<<<<<< HEAD
         print( 'Parsing file {}...'.format(f.name))
+=======
+        print(f'Parsing file {f.name}...')
+>>>>>>> eb1c0f1bf01b46052eaac27e04806ed7c9b35991
         classes.append(ClassParser.parse_file(f))
         f.close()
 
@@ -156,7 +160,11 @@ if __name__ == '__main__':
     render('date.js', 'date.js', level=0, currdate=time.strftime("%d/%m/%Y"))
 
     for class_ in classes:
+<<<<<<< HEAD
         print ('Rending pages for class {}...'.format(class_.name))
+=======
+        print(f'Rendering pages for class {class_.name}...')
+>>>>>>> eb1c0f1bf01b46052eaac27e04806ed7c9b35991
 
         # Make a folder for the class.
         os.mkdir('build/' + class_.name)

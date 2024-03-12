@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -19,9 +19,9 @@ namespace LuaCorpse
      *
      * @return ObjectGuid ownerGUID
      */
-    int GetOwnerGUID(lua_State* L, Corpse* corpse)
+    int GetOwnerGUID(Eluna* E, Corpse* corpse)
     {
-        Eluna::Push(L, corpse->GetOwnerGUID());
+        E->Push(corpse->GetOwnerGUID());
         return 1;
     }
 
@@ -30,9 +30,9 @@ namespace LuaCorpse
      *
      * @return uint32 ghostTime
      */
-    int GetGhostTime(lua_State* L, Corpse* corpse)
+    int GetGhostTime(Eluna* E, Corpse* corpse)
     {
-        Eluna::Push(L, corpse->GetGhostTime());
+        E->Push(corpse->GetGhostTime());
         return 1;
     }
 
@@ -48,9 +48,9 @@ namespace LuaCorpse
      *
      * @return [CorpseType] corpseType
      */
-    int GetType(lua_State* L, Corpse* corpse)
+    int GetType(Eluna* E, Corpse* corpse)
     {
-        Eluna::Push(L, corpse->GetType());
+        E->Push(corpse->GetType());
         return 1;
     }
 
@@ -59,7 +59,7 @@ namespace LuaCorpse
      *
      * See [Corpse:GetGhostTime].
      */
-    int ResetGhostTime(lua_State* /*L*/, Corpse* corpse)
+    int ResetGhostTime(Eluna* /*E*/, Corpse* corpse)
     {
         corpse->ResetGhostTime();
         return 0;
@@ -68,7 +68,7 @@ namespace LuaCorpse
     /**
      * Saves the [Corpse] to the database.
      */
-    int SaveToDB(lua_State* /*L*/, Corpse* corpse)
+    int SaveToDB(Eluna* /*E*/, Corpse* corpse)
     {
         corpse->SaveToDB();
         return 0;
@@ -85,7 +85,7 @@ namespace LuaCorpse
         { "ResetGhostTime", &LuaCorpse::ResetGhostTime },
         { "SaveToDB", &LuaCorpse::SaveToDB },
 
-        { NULL, NULL }
+        { NULL, NULL, METHOD_REG_NONE }
     };
 };
 #endif

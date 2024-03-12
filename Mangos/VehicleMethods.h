@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -20,14 +20,11 @@ namespace LuaVehicle
      * @param [Unit] passenger
      * @return bool isOnBoard
      */
-    int IsOnBoard(lua_State* L, Vehicle* vehicle)
+    int IsOnBoard(Eluna* E, Vehicle* vehicle)
     {
-        Unit* passenger = Eluna::CHECKOBJ<Unit>(L, 2);
-#if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, passenger->IsOnVehicle(vehicle->GetBase()));
-#else
-        Eluna::Push(L, vehicle->HasOnBoard(passenger));
-#endif
+        Unit* passenger = E->CHECKOBJ<Unit>(2);
+
+        E->Push(vehicle->HasOnBoard(passenger));
         return 1;
     }
 
@@ -36,13 +33,9 @@ namespace LuaVehicle
      *
      * @return [Unit] owner
      */
-    int GetOwner(lua_State* L, Vehicle* vehicle)
+    int GetOwner(Eluna* E, Vehicle* vehicle)
     {
-#if defined TRINITY || AZEROTHCORE
-        Eluna::Push(L, vehicle->GetBase());
-#else
-        Eluna::Push(L, vehicle->GetOwner());
-#endif
+        E->Push(vehicle->GetOwner());
         return 1;
     }
 
@@ -51,15 +44,9 @@ namespace LuaVehicle
      *
      * @return uint32 entry
      */
-    int GetEntry(lua_State* L, Vehicle* vehicle)
+    int GetEntry(Eluna* E, Vehicle* vehicle)
     {
-#ifdef TRINITY
-        Eluna::Push(L, vehicle->GetVehicleInfo()->ID);
-#elif AZEROTHCORE
-        Eluna::Push(L, vehicle->GetVehicleInfo()->m_ID);
-#else
-        Eluna::Push(L, vehicle->GetVehicleEntry()->m_ID);
-#endif
+        E->Push(vehicle->GetVehicleEntry()->m_ID);
         return 1;
     }
 
@@ -69,10 +56,10 @@ namespace LuaVehicle
      * @param int8 seat
      * @return [Unit] passenger
      */
-    int GetPassenger(lua_State* L, Vehicle* vehicle)
+    int GetPassenger(Eluna* E, Vehicle* vehicle)
     {
-        int8 seatId = Eluna::CHECKVAL<int8>(L, 2);
-        Eluna::Push(L, vehicle->GetPassenger(seatId));
+        int8 seatId = E->CHECKVAL<int8>(2);
+        E->Push(vehicle->GetPassenger(seatId));
         return 1;
     }
 
@@ -82,16 +69,14 @@ namespace LuaVehicle
      * @param [Unit] passenger
      * @param int8 seat
      */
-    int AddPassenger(lua_State* L, Vehicle* vehicle)
+    int AddPassenger(Eluna* E, Vehicle* vehicle)
     {
-        Unit* passenger = Eluna::CHECKOBJ<Unit>(L, 2);
-        int8 seatId = Eluna::CHECKVAL<int8>(L, 3);
-#if defined TRINITY || AZEROTHCORE
-        vehicle->AddPassenger(passenger, seatId);
-#else
+        Unit* passenger = E->CHECKOBJ<Unit>(2);
+        int8 seatId = E->CHECKVAL<int8>(3);
+
         if (vehicle->CanBoard(passenger))
             vehicle->Board(passenger, seatId);
-#endif
+
         return 0;
     }
 
@@ -100,14 +85,11 @@ namespace LuaVehicle
      *
      * @param [Unit] passenger
      */
-    int RemovePassenger(lua_State* L, Vehicle* vehicle)
+    int RemovePassenger(Eluna* E, Vehicle* vehicle)
     {
-        Unit* passenger = Eluna::CHECKOBJ<Unit>(L, 2);
-#if defined TRINITY || AZEROTHCORE
-        vehicle->RemovePassenger(passenger);
-#else
+        Unit* passenger = E->CHECKOBJ<Unit>(2);
+
         vehicle->UnBoard(passenger, false);
-#endif
         return 0;
     }
     
@@ -125,7 +107,7 @@ namespace LuaVehicle
         { "AddPassenger", &LuaVehicle::AddPassenger },
         { "RemovePassenger", &LuaVehicle::RemovePassenger },
 
-        { NULL, NULL }
+        { NULL, NULL, METHOD_REG_NONE }
     };
 }
 

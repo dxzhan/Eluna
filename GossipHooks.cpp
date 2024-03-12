@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -14,20 +14,14 @@
 using namespace Hooks;
 
 #define START_HOOK(BINDINGS, EVENT, ENTRY) \
-    if (!IsEnabled())\
-        return;\
     auto key = EntryKey<GossipEvents>(EVENT, ENTRY);\
     if (!BINDINGS->HasBindingsFor(key))\
-        return;\
-    LOCK_ELUNA
+        return;
 
 #define START_HOOK_WITH_RETVAL(BINDINGS, EVENT, ENTRY, RETVAL) \
-    if (!IsEnabled())\
-        return RETVAL;\
     auto key = EntryKey<GossipEvents>(EVENT, ENTRY);\
     if (!BINDINGS->HasBindingsFor(key))\
-        return RETVAL;\
-    LOCK_ELUNA
+        return RETVAL;
 
 bool Eluna::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 {
@@ -37,8 +31,8 @@ bool Eluna::OnGossipHello(Player* pPlayer, GameObject* pGameObject)
 #else
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pGameObject);
+    HookPush(pPlayer);
+    HookPush(pGameObject);
     return CallAllFunctionsBool(GameObjectGossipBindings, key, true);
 }
 
@@ -50,10 +44,10 @@ bool Eluna::OnGossipSelect(Player* pPlayer, GameObject* pGameObject, uint32 send
 #else
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pGameObject);
-    Push(sender);
-    Push(action);
+    HookPush(pPlayer);
+    HookPush(pGameObject);
+    HookPush(sender);
+    HookPush(action);
     return CallAllFunctionsBool(GameObjectGossipBindings, key, true);
 }
 
@@ -65,11 +59,11 @@ bool Eluna::OnGossipSelectCode(Player* pPlayer, GameObject* pGameObject, uint32 
 #else
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pGameObject);
-    Push(sender);
-    Push(action);
-    Push(code);
+    HookPush(pPlayer);
+    HookPush(pGameObject);
+    HookPush(sender);
+    HookPush(action);
+    HookPush(code);
     return CallAllFunctionsBool(GameObjectGossipBindings, key, true);
 }
 
@@ -82,14 +76,14 @@ void Eluna::HandleGossipSelectOption(Player* pPlayer, uint32 menuId, uint32 send
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
 
-    Push(pPlayer); // receiver
-    Push(pPlayer); // sender, just not to mess up the amount of args.
-    Push(sender);
-    Push(action);
+    HookPush(pPlayer); // receiver
+    HookPush(pPlayer); // sender, just not to mess up the amount of args.
+    HookPush(sender);
+    HookPush(action);
     if (code.empty())
-        Push();
+        HookPush();
     else
-        Push(code);
+        HookPush(code);
 
     CallAllFunctions(PlayerGossipBindings, key);
 }
@@ -102,8 +96,8 @@ bool Eluna::OnItemGossip(Player* pPlayer, Item* pItem, SpellCastTargets const& /
 #else
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pItem);
+    HookPush(pPlayer);
+    HookPush(pItem);
     return CallAllFunctionsBool(ItemGossipBindings, key, true);
 }
 
@@ -116,14 +110,14 @@ void Eluna::HandleGossipSelectOption(Player* pPlayer, Item* pItem, uint32 sender
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
 
-    Push(pPlayer);
-    Push(pItem);
-    Push(sender);
-    Push(action);
+    HookPush(pPlayer);
+    HookPush(pItem);
+    HookPush(sender);
+    HookPush(action);
     if (code.empty())
-        Push();
+        HookPush();
     else
-        Push(code);
+        HookPush(code);
 
     CallAllFunctions(ItemGossipBindings, key);
 }
@@ -136,8 +130,8 @@ bool Eluna::OnGossipHello(Player* pPlayer, Creature* pCreature)
 #else
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pCreature);
+    HookPush(pPlayer);
+    HookPush(pCreature);
     return CallAllFunctionsBool(CreatureGossipBindings, key, true);
 }
 
@@ -151,10 +145,10 @@ bool Eluna::OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 sender, 
     auto original_menu = *pPlayer->PlayerTalkClass;
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pCreature);
-    Push(sender);
-    Push(action);
+    HookPush(pPlayer);
+    HookPush(pCreature);
+    HookPush(sender);
+    HookPush(action);
     auto preventDefault = CallAllFunctionsBool(CreatureGossipBindings, key, true);
     if (!preventDefault) {
 #if defined CMANGOS && !defined(CATA)
@@ -176,11 +170,11 @@ bool Eluna::OnGossipSelectCode(Player* pPlayer, Creature* pCreature, uint32 send
     auto original_menu = *pPlayer->PlayerTalkClass;
     pPlayer->PlayerTalkClass->ClearMenus();
 #endif
-    Push(pPlayer);
-    Push(pCreature);
-    Push(sender);
-    Push(action);
-    Push(code);
+    HookPush(pPlayer);
+    HookPush(pCreature);
+    HookPush(sender);
+    HookPush(action);
+    HookPush(code);
     auto preventDefault = CallAllFunctionsBool(CreatureGossipBindings, key, true);
     if (!preventDefault) {
 #if defined CMANGOS &&!defined(CATA)
