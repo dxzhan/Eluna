@@ -47,11 +47,8 @@ ElunaLoader::~ElunaLoader()
 void ElunaLoader::LoadScripts()
 {
     lua_folderpath = sElunaConfig->GetConfig(CONFIG_ELUNA_SCRIPT_PATH);
-<<<<<<< HEAD
-=======
     const std::string& lua_path_extra = sElunaConfig->GetConfig(CONFIG_ELUNA_REQUIRE_PATH_EXTRA);
     const std::string& lua_cpath_extra = sElunaConfig->GetConfig(CONFIG_ELUNA_REQUIRE_CPATH_EXTRA);
->>>>>>> 1817ebb56f4bbd5b95f35cad445059f76d5445c2
 
     uint32 oldMSTime = ElunaUtil::GetCurrTime();
     lua_scripts.clear();
@@ -69,8 +66,6 @@ void ElunaLoader::LoadScripts()
     ReadFiles(lua_folderpath);
     CombineLists();
 
-<<<<<<< HEAD
-=======
     // append our custom require paths and cpaths if the config variables are not empty
     if (!lua_path_extra.empty())
         lua_requirepath += lua_path_extra;
@@ -78,7 +73,6 @@ void ElunaLoader::LoadScripts()
     if (!lua_cpath_extra.empty())
         lua_requirecpath += lua_cpath_extra;
 
->>>>>>> 1817ebb56f4bbd5b95f35cad445059f76d5445c2
     // Erase last ;
     if (!lua_requirepath.empty())
         lua_requirepath.erase(lua_requirepath.end() - 1);
@@ -205,11 +199,7 @@ bool ElunaLoader::CompileScript(lua_State* L, LuaScript& script)
     ELUNA_LOG_DEBUG("[Eluna]: CompileScript loaded Lua script `%s`", script.filename.c_str());
 
     // Everything's OK so far, the script has been loaded, now we need to start dumping it to bytecode.
-<<<<<<< HEAD
     err = lua_dump(L, (lua_Writer)LoadBytecodeChunk, &script.bytecode,0);
-=======
-    err = lua_dump(L, (lua_Writer)LoadBytecodeChunk, &script.bytecode);
->>>>>>> 1817ebb56f4bbd5b95f35cad445059f76d5445c2
     if (err || script.bytecode.empty())
     {
         ELUNA_LOG_ERROR("[Eluna]: CompileScript failed to dump the Lua script `%s` to bytecode.", script.filename.c_str());
