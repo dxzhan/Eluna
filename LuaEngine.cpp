@@ -443,7 +443,11 @@ void Eluna::Push(const int i)
 }
 void Eluna::Push(const unsigned int u)
 {
+<<<<<<< HEAD
     lua_pushinteger(L, u);
+=======
+    lua_pushunsigned(L, u);
+>>>>>>> 1817ebb56f4bbd5b95f35cad445059f76d5445c2
 }
 void Eluna::Push(const double d)
 {
