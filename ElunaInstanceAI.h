@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+* Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
 * This program is free software licensed under GPL version 3
 * Please see the included DOCS/LICENSE.md for more information
 */
@@ -135,24 +135,20 @@ public:
         // If Eluna is reloaded, it will be missing our instance data.
         // Reload here instead of waiting for the next hook call (possibly never).
         // This avoids having to have an empty Update hook handler just to trigger the reload.
-#ifdef TRINITY
-        if (!sEluna->HasInstanceData(reinterpret_cast<const Map*>(instance)))
-#else
-        if (!sEluna->HasInstanceData(instance))
-#endif
+        if (!instance->GetEluna()->HasInstanceData(instance))
             Reload();
 
-        sEluna->OnUpdateInstance(this, diff);
+        instance->GetEluna()->OnUpdateInstance(this, diff);
     }
 
     bool IsEncounterInProgress() const override
     {
-        return sEluna->OnCheckEncounterInProgress(const_cast<ElunaInstanceAI*>(this));
+        return instance->GetEluna()->OnCheckEncounterInProgress(const_cast<ElunaInstanceAI*>(this));
     }
 
     void OnPlayerEnter(Player* player) override
     {
-        sEluna->OnPlayerEnterInstance(this, player);
+        instance->GetEluna()->OnPlayerEnterInstance(this, player);
     }
 
 #if defined TRINITY || AZEROTHCORE
@@ -161,12 +157,12 @@ public:
     void OnObjectCreate(GameObject* gameobject) override
 #endif
     {
-        sEluna->OnGameObjectCreate(this, gameobject);
+        instance->GetEluna()->OnGameObjectCreate(this, gameobject);
     }
 
     void OnCreatureCreate(Creature* creature) override
     {
-        sEluna->OnCreatureCreate(this, creature);
+        instance->GetEluna()->OnCreatureCreate(this, creature);
     }
 };
 

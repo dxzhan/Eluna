@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 - 2016 Eluna Lua Engine <http://emudevs.com/>
+ * Copyright (C) 2010 - 2024 Eluna Lua Engine <https://elunaluaengine.github.io/>
  * This program is free software licensed under GPL version 3
  * Please see the included DOCS/LICENSE.md for more information
  */
@@ -80,6 +80,7 @@ namespace Hooks
         REGTYPE_CREATURE_GOSSIP,
         REGTYPE_GAMEOBJECT,
         REGTYPE_GAMEOBJECT_GOSSIP,
+        REGTYPE_SPELL,
         REGTYPE_ITEM,
         REGTYPE_ITEM_GOSSIP,
         REGTYPE_PLAYER_GOSSIP,
@@ -207,7 +208,7 @@ namespace Hooks
         PLAYER_EVENT_ON_SKILL_CHANGE            =     43,       // (event, player, skillId, skillValue) - Returns new skill level value
         PLAYER_EVENT_ON_LEARN_SPELL             =     44,       // (event, player, spellId)
         PLAYER_EVENT_ON_ACHIEVEMENT_COMPLETE    =     45,       // (event, player, achievementId)
-        // UNUSED                               =     46,       // (event, player)
+        PLAYER_EVENT_ON_DISCOVER_AREA           =     46,       // (event, player, area)
         PLAYER_EVENT_ON_UPDATE_AREA             =     47,       // (event, player, oldArea, newArea)
         PLAYER_EVENT_ON_TRADE_INIT              =     48,       // (event, player, target) - Can return false to interrupt trade
         PLAYER_EVENT_ON_SEND_MAIL               =     49,       // (event, player, recipientGuid) - Can return false to interrupt sending
@@ -325,6 +326,12 @@ namespace Hooks
         GAMEOBJECT_EVENT_COUNT
     };
 
+    enum SpellEvents
+    {
+        SPELL_EVENT_ON_CAST                             = 1,    // (event, spell, skipCheck)
+        SPELL_EVENT_COUNT
+    };
+
     enum ItemEvents
     {
         ITEM_EVENT_ON_DUMMY_EFFECT                      = 1,    // (event, caster, spellid, effindex, item)
@@ -335,6 +342,8 @@ namespace Hooks
 
         // Custom
         ITEM_EVENT_ON_ADD                               = 6,    // (event, player, item)
+        ITEM_EVENT_ON_EQUIP                             = 7,    // (event, player, item, slot)
+        ITEM_EVENT_ON_UNEQUIP                           = 8,    // (event, player, item, slot)
 
         ITEM_EVENT_COUNT
     };
@@ -366,6 +375,7 @@ namespace Hooks
         INSTANCE_EVENT_ON_CHECK_ENCOUNTER_IN_PROGRESS   = 7,    // (event, instance_data, map)
         INSTANCE_EVENT_COUNT
     };
+
 };
 
 #endif // _HOOKS_H
