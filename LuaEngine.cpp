@@ -7,6 +7,7 @@
 #include "Hooks.h"
 #include "LuaEngine.h"
 #include "BindingMap.h"
+#include "ElunaCompat.h"
 #include "ElunaConfig.h"
 #include "ElunaEventMgr.h"
 #include "ElunaIncludes.h"
@@ -15,36 +16,6 @@
 #include "ElunaUtility.h"
 #include "ElunaCreatureAI.h"
 #include "ElunaInstanceAI.h"
-
-#if defined(TRINITY_PLATFORM) && defined(TRINITY_PLATFORM_WINDOWS)
-#if TRINITY_PLATFORM == TRINITY_PLATFORM_WINDOWS
-#define ELUNA_WINDOWS
-#endif
-#elif defined(AC_PLATFORM) && defined(AC_PLATFORM_WINDOWS)
-#if AC_PLATFORM == AC_PLATFORM_WINDOWS
-#define ELUNA_WINDOWS
-#endif
-#elif defined(PLATFORM) && defined(PLATFORM_WINDOWS)
-#if PLATFORM == PLATFORM_WINDOWS
-#define ELUNA_WINDOWS
-#endif
-#else
-#error Eluna could not determine platform
-#endif
-
-// Some dummy includes containing BOOST_VERSION:
-// ObjectAccessor.h Config.h Log.h
-#if !defined(MANGOS) && !defined(VMANGOS)
-#define USING_BOOST
-#endif
-
-#ifdef USING_BOOST
-#include <boost/filesystem.hpp>
-#else
-#include <ace/ACE.h>
-#include <ace/Dirent.h>
-#include <ace/OS_NS_sys_stat.h>
-#endif
 
 extern "C"
 {
@@ -107,7 +78,12 @@ CreatureUniqueBindings(NULL)
 {
     OpenLua();
     eventMgr = new EventMgr(this);
-    RunScripts();
+
+    // if the script cache is ready, run scripts, otherwise flag state for reload
+    if (sElunaLoader->GetCacheState() == SCRIPT_CACHE_READY)
+        RunScripts();
+    else
+        reload = true;
 }
 
 Eluna::~Eluna()
@@ -127,9 +103,34 @@ void Eluna::CloseLua()
     if (L)
         lua_close(L);
     L = NULL;
+    stacktraceFunctionStackIndex = 0;
 
     instanceDataRefs.clear();
     continentDataRefs.clear();
+}
+
+static int PrecompiledLoader(lua_State* L)
+{
+    const char* modname = lua_tostring(L, 1);
+    if (modname == NULL)
+        return 0;
+
+    const std::vector<LuaScript>& scripts = sElunaLoader->GetLuaScripts();
+
+    auto it = std::find_if(scripts.begin(), scripts.end(), [modname](const LuaScript& script) { return script.filename == modname; });
+    if (it == scripts.end()) {
+        lua_pushfstring(L, "\n\tno precompiled script '%s' found", modname);
+        return 1;
+    }
+    if (luaL_loadbuffer(L, reinterpret_cast<const char*>(&it->bytecode[0]), it->bytecode.size(), it->filename.c_str()))
+    {
+        // Stack: modname, errmsg
+        return lua_error(L);
+    }
+    // Stack: modname, filefunction
+    lua_pushstring(L, it->filepath.c_str());
+    // Stack: modname, filefunction, modpath
+    return 2;
 }
 
 void Eluna::OpenLua()
@@ -144,18 +145,39 @@ void Eluna::OpenLua()
     // open base lua libraries
     luaL_openlibs(L);
 
-    // open additional lua libraries
-
     // Register methods and functions
     RegisterFunctions(this);
 
+    // get require paths
+    const std::string& requirepath = sElunaLoader->GetRequirePath();
+    const std::string& requirecpath = sElunaLoader->GetRequireCPath();
+
     // Set lua require folder paths (scripts folder structure)
     lua_getglobal(L, "package");
-    lua_pushstring(L, sElunaLoader->lua_requirepath.c_str());
+    lua_pushstring(L, requirepath.c_str());
     lua_setfield(L, -2, "path");
-    lua_pushstring(L, sElunaLoader->lua_requirecpath.c_str());
+    lua_pushstring(L, requirecpath.c_str());
     lua_setfield(L, -2, "cpath");
-    lua_pop(L, 1);
+    // Set package.loaders loader for precompiled scripts
+    lua_getfield(L, -1, "loaders");
+    if (lua_isnil(L, -1)) {
+        // Lua 5.2+ uses searchers instead of loaders
+        lua_pop(L, 1);
+        lua_getfield(L, -1, "searchers");
+    }
+    // insert the new loader to the loaders table by shifting other elements down by one
+    const int newLoaderIndex = 1;
+    for (int i = lua_rawlen(L, -1); i >= newLoaderIndex; --i) {
+        lua_rawgeti(L, -1, i);
+        lua_rawseti(L, -2, i + 1);
+    }
+    lua_pushcfunction(L, &PrecompiledLoader);
+    lua_rawseti(L, -2, newLoaderIndex);
+    lua_pop(L, 2); // pop loaders/searchers table, pop package table
+
+    // Leave StackTrace function on stack and save reference to it
+    lua_pushcfunction(L, &StackTrace);
+    stacktraceFunctionStackIndex = lua_gettop(L);
 }
 
 void Eluna::CreateBindStores()
@@ -240,13 +262,12 @@ void Eluna::RunScripts()
 
     std::unordered_map<std::string, std::string> loaded; // filename, path
 
-    lua_getglobal(L, "package");
-    // Stack: package
-    luaL_getsubtable(L, -1, "loaded");
-    // Stack: package, modules
-    int modules = lua_gettop(L);
+    lua_getglobal(L, "require");
+    // Stack: require
 
-    for (auto it = sElunaLoader->combined_scripts.begin(); it != sElunaLoader->combined_scripts.end(); ++it)
+    const std::vector<LuaScript>& scripts = sElunaLoader->GetLuaScripts();
+
+    for (auto it = scripts.begin(); it != scripts.end(); ++it)
     {
         // if the Eluna state is in compatibility mode, it should load all scripts, including those tagged with a specific map ID
         if (!GetCompatibilityMode())
@@ -267,61 +288,34 @@ void Eluna::RunScripts()
         }
         loaded[it->filename] = it->filepath;
 
-        lua_getfield(L, modules, it->filename.c_str());
-        // Stack: package, modules, module
-        if (!lua_isnoneornil(L, -1))
+        // We call require on the filename to load the script
+        // A custom loader is used to load the script from the combined_scripts table
+        // The loader is set up in Eluna::OpenLua
+        lua_pushvalue(L, -1); // Stack: require, require
+        lua_pushstring(L, it->filename.c_str()); // Stack: require, require, filename
+        if (ExecuteCall(1, 0))
         {
-            lua_pop(L, 1);
-            ELUNA_LOG_DEBUG("[Eluna]: `%s` was already loaded or required", it->filepath.c_str());
-            continue;
-        }
-        lua_pop(L, 1);
-        // Stack: package, modules
-
-        if (luaL_loadbuffer(L, reinterpret_cast<const char*>(&it->bytecode[0]), it->bytecode.size(), it->filename.c_str()))
-        {
-            // Stack: package, modules, errmsg
-            ELUNA_LOG_ERROR("[Eluna]: Error loading `%s`", it->filepath.c_str());
-            Report(L);
-            // Stack: package, modules
-            continue;
-        }
-        // Stack: package, modules, filefunc
-
-        if (ExecuteCall(0, 1))
-        {
-            // Stack: package, modules, result
-            if (lua_isnoneornil(L, -1) || (lua_isboolean(L, -1) && !lua_toboolean(L, -1)))
-            {
-                // if result evaluates to false, change it to true
-                lua_pop(L, 1);
-                Push(true);
-            }
-            lua_setfield(L, modules, it->filename.c_str());
-            // Stack: package, modules
-
-            // successfully loaded and ran file
+            // Successfully called require on the script
             ELUNA_LOG_DEBUG("[Eluna]: Successfully loaded `%s`", it->filepath.c_str());
             ++count;
             continue;
         }
+        // Stack: require
     }
-    // Stack: package, modules
-    lua_pop(L, 2);
+    // Stack: require
+    lua_pop(L, 1);
     ELUNA_LOG_INFO("[Eluna]: Executed %u Lua scripts in %u ms for map: %i, instance: %u", count, ElunaUtil::GetTimeDiff(oldMSTime), boundMapId, boundInstanceId);
 
     OnLuaStateOpen();
 }
 
+#if !defined TRACKABLE_PTR_NAMESPACE
 void Eluna::InvalidateObjects()
 {
     ++callstackid;
-#ifdef TRINITY
-    ASSERT(callstackid, "Callstackid overflow");
-#else
     ASSERT(callstackid && "Callstackid overflow");
-#endif
 }
+#endif
 
 void Eluna::Report(lua_State* _L)
 {
@@ -376,24 +370,16 @@ bool Eluna::ExecuteCall(int params, int res)
     }
 
     bool usetrace = sElunaConfig->GetConfig(CONFIG_ELUNA_TRACEBACK);
-    if (usetrace)
+    if (usetrace && !lua_iscfunction(L, stacktraceFunctionStackIndex))
     {
-        lua_pushcfunction(L, &StackTrace);
-        // Stack: function, [parameters], traceback
-        lua_insert(L, base);
-        // Stack: traceback, function, [parameters]
+        ELUNA_LOG_ERROR("[Eluna]: Cannot execute call: registered value is %s, not a c-function.", luaL_tolstring(L, stacktraceFunctionStackIndex, NULL));
+        ASSERT(false); // stack probably corrupt
     }
 
     // Objects are invalidated when event_level hits 0
     ++event_level;
-    int result = lua_pcall(L, params, res, usetrace ? base : 0);
+    int result = lua_pcall(L, params, res, usetrace ? stacktraceFunctionStackIndex : 0);
     --event_level;
-
-    if (usetrace)
-    {
-        // Stack: traceback, [results or errmsg]
-        lua_remove(L, base);
-    }
     // Stack: [results or errmsg]
 
     // lua_pcall returns 0 on success.
@@ -423,11 +409,13 @@ void Eluna::Push()
 }
 void Eluna::Push(const long long l)
 {
-    ElunaTemplate<long long>::Push(this, new long long(l));
+    // pushing pointer to local is fine, a copy of value will be stored, not pointer itself
+    ElunaTemplate<long long>::Push(this, &l);
 }
 void Eluna::Push(const unsigned long long l)
 {
-    ElunaTemplate<unsigned long long>::Push(this, new unsigned long long(l));
+    // pushing pointer to local is fine, a copy of value will be stored, not pointer itself
+    ElunaTemplate<unsigned long long>::Push(this, &l);
 }
 void Eluna::Push(const long l)
 {
@@ -544,7 +532,8 @@ void Eluna::Push(Object const* obj)
 }
 void Eluna::Push(ObjectGuid const guid)
 {
-    ElunaTemplate<unsigned long long>::Push(this, new unsigned long long(guid.GetRawValue()));
+    // pushing pointer to local is fine, a copy of value will be stored, not pointer itself
+    ElunaTemplate<ObjectGuid>::Push(this, &guid);
 }
 
 static int CheckIntegerRange(lua_State* luastate, int narg, int min, int max)
@@ -650,7 +639,8 @@ template<> unsigned long Eluna::CHECKVAL<unsigned long>(int narg)
 }
 template<> ObjectGuid Eluna::CHECKVAL<ObjectGuid>(int narg)
 {
-    return ObjectGuid(uint64((CHECKVAL<unsigned long long>(narg))));
+    ObjectGuid* guid = CHECKOBJ<ObjectGuid>(narg, true);
+    return guid ? *guid : ObjectGuid();
 }
 
 template<> Object* Eluna::CHECKOBJ<Object>(int narg, bool error)
@@ -980,21 +970,27 @@ int Eluna::Register(uint8 regtype, uint32 entry, ObjectGuid guid, uint32 instanc
     }
     luaL_unref(L, LUA_REGISTRYINDEX, functionRef);
     std::ostringstream oss;
-    oss << "regtype " << static_cast<uint32>(regtype) << ", event " << event_id << ", entry " << entry << ", guid " << guid.GetRawValue() << ", instance " << instanceId;
+    oss << "regtype " << static_cast<uint32>(regtype) << ", event " << event_id << ", entry " << entry << ", guid " <<
+#if defined ELUNA_TRINITY
+        guid.ToHexString()
+#else
+        guid.GetRawValue()
+#endif
+        << ", instance " << instanceId;
     luaL_error(L, "Unknown event type (%s)", oss.str().c_str());
     return 0;
 }
 
 void Eluna::UpdateEluna(uint32 diff)
 {
-    if (reload)
-#ifdef TRINITY
+    if (reload && sElunaLoader->GetCacheState() == SCRIPT_CACHE_READY)
+#if defined ELUNA_TRINITY
         if(!GetQueryProcessor().HasPendingCallbacks())
 #endif
             _ReloadEluna();
 
     eventMgr->globalProcessor->Update(diff);
-#ifdef TRINITY
+#if defined ELUNA_TRINITY
     GetQueryProcessor().ProcessReadyCallbacks();
 #endif
 }
@@ -1009,8 +1005,10 @@ void Eluna::CleanUpStack(int number_of_arguments)
     lua_pop(L, number_of_arguments + 1); // Add 1 because the caller doesn't know about `event_id`.
     // Stack: (empty)
 
+#if !defined TRACKABLE_PTR_NAMESPACE
     if (event_level == 0)
         InvalidateObjects();
+#endif
 }
 
 /*
