@@ -1054,7 +1054,7 @@ namespace LuaPlayer
      */
     int GetGuildRank(Eluna* E, Player* player) // TODO: Move to Guild Methods
     {
-        E->Push(player->GetRank());
+        E->Push(player->GetGuildRank());
         return 1;
     }
 
@@ -1677,7 +1677,7 @@ namespace LuaPlayer
         if (!player->GetGuildId())
             return 0;
 
-        player->SetRank(rank);
+        player->SetGuildRank(rank);
         return 0;
     }
 
@@ -1975,10 +1975,10 @@ namespace LuaPlayer
         switch (pType)
         {
             case 1: // MOVE_ROOT
-                player->SetRooted(true);
+                player->SetMovement(PlayerMovementType::MOVE_ROOT);
                 break;
             case 2: // MOVE_UNROOT
-                player->SetRooted(false);
+                player->SetMovement(PlayerMovementType::MOVE_UNROOT);
                 break;
             case 3: // MOVE_WATER_WALK
                 player->SetWaterWalking(true);

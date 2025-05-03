@@ -244,7 +244,7 @@ namespace LuaGlobalFunctions
         uint32 i = 0;
 
         Map::PlayerList const& players = E->GetBoundMap()->GetPlayers();
-        if (!players.isEmpty())
+        if (!players.IsEmpty())
         {
             for (Map::PlayerList::const_iterator it = players.begin(); it != players.end(); ++it)
             {
