@@ -19,13 +19,15 @@
 namespace LuaPlayer
 {
     /**
-     * Returns 'true' if the [Player] can Titan Grip, 'false' otherwise.
-     *
+     * Returns 'true' if the [Player] can Titan Grip the specific [Item], 'false' otherwise.
+     * @param [Item] item : an instance of an item
      * @return bool canTitanGrip
      */
     int CanTitanGrip(Eluna* E, Player* player)
     {
-        E->Push(player->CanTitanGrip());
+        Item* item = E->CHECKOBJ<Item>(2);
+
+        E->Push(player->CanTitanGrip(item));
         return 1;
     }
 
@@ -2080,10 +2082,10 @@ namespace LuaPlayer
         switch (pType)
         {
             case 1: // MOVE_ROOT
-                player->SetMovement(PlayerMovementType::MOVE_ROOT);
+                player->SetControlled(true, UNIT_STATE_ROOT);
                 break;
             case 2: // MOVE_UNROOT
-                player->SetMovement(PlayerMovementType::MOVE_UNROOT);
+                player->SetControlled(false, UNIT_STATE_ROOT);
                 break;
             case 3: // MOVE_WATER_WALK
                 player->SetWaterWalking(true);

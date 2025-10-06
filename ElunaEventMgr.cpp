@@ -53,7 +53,8 @@ void ElunaEventProcessor::Update(uint32 diff)
                 AddEvent(luaEvent); // Reschedule before calling incase RemoveEvents used
 
             // Call the timed event
-            E->OnTimedEvent(luaEvent->funcRef, delay, luaEvent->repeats ? luaEvent->repeats-- : luaEvent->repeats, obj);
+            if(!obj || (obj && obj->IsInWorld()))
+                E->OnTimedEvent(luaEvent->funcRef, delay, luaEvent->repeats ? luaEvent->repeats-- : luaEvent->repeats, obj);
 
             if (!remove)
                 continue;
@@ -112,20 +113,25 @@ void ElunaEventProcessor::RemoveEvent(LuaEvent* luaEvent)
     delete luaEvent;
 }
 
-EventMgr::EventMgr(Eluna* _E) : globalProcessor(new ElunaEventProcessor(_E, NULL)), E(_E)
+EventMgr::EventMgr(Eluna* _E) : E(_E)
 {
+    globalProcessor = std::make_unique<ElunaEventProcessor>(E, nullptr);
 }
 
 EventMgr::~EventMgr()
 {
-    {
-        if (!processors.empty())
-            for (ProcessorSet::const_iterator it = processors.begin(); it != processors.end(); ++it) // loop processors
-                (*it)->RemoveEvents_internal();
-        globalProcessor->RemoveEvents_internal();
-    }
-    delete globalProcessor;
-    globalProcessor = NULL;
+    if (!processors.empty())
+        for (ProcessorSet::const_iterator it = processors.begin(); it != processors.end(); ++it) // loop processors
+            (*it)->RemoveEvents_internal();
+    globalProcessor->RemoveEvents_internal();
+}
+
+void EventMgr::UpdateProcessors(uint32 diff)
+{
+    if (!processors.empty())
+        for (ProcessorSet::const_iterator it = processors.begin(); it != processors.end(); ++it) // loop processors
+            (*it)->Update(diff);
+    globalProcessor->Update(diff);
 }
 
 void EventMgr::SetStates(LuaEventState state)
